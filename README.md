@@ -1,5 +1,7 @@
 # nix-config
 
+## My NixOS desktop 
+
 <img width="3440" height="1440" alt="image" src="https://github.com/user-attachments/assets/7a320634-8025-417b-a29b-8bb51595bb54" />
 
 <img width="1500" height="900" alt="image" src="https://github.com/user-attachments/assets/ed19d99c-647c-4c8f-830d-702923474405" />
@@ -12,5 +14,4 @@
 
 <img width="913" height="622" alt="image" src="https://github.com/user-attachments/assets/74ba3b07-a4de-4145-8b02-b7321ae4e1da" />
 
-My NixOS desktop
-Hardware-specific pieces (RTX 4090, 3440x1440 at 240 Hz, disk UUIDs) need changing for another machine.
+Hardware-specific pieces: (RTX 4090, 3440x1440 at 240 Hz, disk UUIDs) need changing for another machine.
