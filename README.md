@@ -1,6 +1,6 @@
 # nix-config
 
-## My NixOS desktop 
+## My NixOS with Umbriel desktop.
 
 <img width="3440" height="1440" alt="image" src="https://github.com/user-attachments/assets/7a320634-8025-417b-a29b-8bb51595bb54" />
 
