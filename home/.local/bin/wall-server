@@ -1,0 +1,38 @@
+#!/usr/bin/env python3
+"""Serve Noctalia's current wallpaper on localhost, for the Discord theme."""
+import http.server, mimetypes, os, shutil, tomllib
+
+SETTINGS_FILE = os.path.expanduser("~/.local/state/noctalia/settings.toml")
+
+
+def current_wallpaper():
+    """Reads Noctalia's settings with a real parser, so reformatting cannot break it."""
+    with open(SETTINGS_FILE, "rb") as f:
+        data = tomllib.load(f).get("wallpaper", {})
+    for entry in list(data.get("monitors", {}).values()) + [data.get("last", {}), data.get("default", {})]:
+        if isinstance(entry, dict) and entry.get("path"):
+            return entry["path"]
+    raise OSError("no wallpaper set")
+
+
+class Handler(http.server.BaseHTTPRequestHandler):
+    def do_GET(self):
+        try:
+            path = current_wallpaper()
+            size = os.path.getsize(path)
+            with open(path, "rb") as f:
+                self.send_response(200)
+                self.send_header("Content-Type", mimetypes.guess_type(path)[0] or "image/jpeg")
+                self.send_header("Content-Length", str(size))
+                self.send_header("Cache-Control", "no-store")
+                self.send_header("Access-Control-Allow-Origin", "*")
+                self.end_headers()
+                shutil.copyfileobj(f, self.wfile)
+        except (OSError, ValueError):
+            self.send_error(404)
+
+    def log_message(self, *args):
+        pass
+
+
+http.server.ThreadingHTTPServer(("127.0.0.1", 1928), Handler).serve_forever()

@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# Switch DP-1 between SDR and HDR by editing Umbriel's config, which reloads on save.
+# 10-bit color stays on in both modes.
+C=$HOME/.config/umbriel/config.toml
+if grep -q '^ hdr = "on"' "$C"; then
+  sed -i '/^ hdr = "on"$/d' "$C"
+  notify-send -a Display "SDR"
+else
+  sed -i 's/^ mode = "3440x1440@240"$/&\n hdr = "on"/' "$C"
+  notify-send -a Display "HDR"
+fi

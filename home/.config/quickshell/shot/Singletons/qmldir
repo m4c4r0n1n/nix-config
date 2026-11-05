@@ -1,0 +1,6 @@
+singleton Theme Theme.qml
+singleton Config Config.qml
+singleton Tokens Tokens.qml
+singleton I18n I18n.qml
+singleton UiPreferences UiPreferences.qml
+singleton Spawn Spawn.qml

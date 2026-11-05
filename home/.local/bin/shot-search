@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Search an image with Google Lens in the default browser.
+# Usage: shot-search IMAGE [--remove-input]
+set -u
+input=$1; remove=${2:-}
+umask 077
+dir=${XDG_RUNTIME_DIR:-/tmp}
+crop=$(mktemp --tmpdir="$dir" shot-lens-XXXXXXXX.jpg)
+html=$(mktemp --tmpdir="$dir" shot-lens-XXXXXXXX.html)
+magick "$input" -resize "1000x1000>" -strip -quality 85 "$crop" 2>/dev/null || cp -- "$input" "$crop"
+b64=$(base64 -w0 "$crop")
+cat >"$html" <<EOF
+<!DOCTYPE html><html><body style="margin:0;display:flex;justify-content:center;align-items:center;height:100vh;background:#111;color:#fff;font-family:system-ui"><p>Searching with Google Lens…</p><form id="f" method="POST" enctype="multipart/form-data" action="https://lens.google.com/v3/upload"></form><script>var b=atob("$b64"),a=new Uint8Array(b.length);for(var i=0;i<b.length;i++)a[i]=b.charCodeAt(i);var d=new DataTransfer();d.items.add(new File([a],"i.jpg",{type:"image/jpeg"}));var inp=document.createElement("input");inp.type="file";inp.name="encoded_image";inp.files=d.files;document.getElementById("f").appendChild(inp);document.getElementById("f").submit();</script></body></html>
+EOF
+xdg-open "file://$html" >/dev/null 2>&1 || notify-send -a Screenshot "Search" "Could not open a browser"
+sleep 15
+rm -f -- "$crop" "$html"
+[[ $remove == --remove-input ]] && rm -f -- "$input"
+exit 0

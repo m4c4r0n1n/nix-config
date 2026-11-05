@@ -1,0 +1,71 @@
+# Powerline prompt with the NixOS flake. Colors are terminal palette slots,
+# which ghostty-wallcolors rebuilds from the wallpaper.
+add_newline = true
+scan_timeout = 100
+format = """
+[](1)$os$username[](bg:2 fg:1)$directory[](fg:2 bg:3)$git_branch$git_status[](fg:3 bg:4)$nodejs$python$rust$golang$nix_shell[](fg:4 bg:5)$time[](fg:5) $character"""
+
+[os]
+disabled = false
+style = "bg:1 fg:0"
+format = "[ $symbol ]($style)"
+
+[os.symbols]
+NixOS = ""
+
+[username]
+show_always = true
+style_user = "bg:1 fg:0"
+style_root = "bg:1 fg:0 bold"
+format = "[$user ]($style)"
+
+[directory]
+style = "bg:2 fg:0"
+format = "[ $path ]($style)"
+truncation_length = 3
+truncation_symbol = "…/"
+
+[git_branch]
+symbol = ""
+style = "bg:3 fg:0"
+format = "[ $symbol $branch ]($style)"
+
+[git_status]
+style = "bg:3 fg:0"
+format = "[$all_status$ahead_behind ]($style)"
+
+[nodejs]
+symbol = ""
+style = "bg:4 fg:0"
+format = "[ $symbol $version ]($style)"
+
+[python]
+symbol = ""
+style = "bg:4 fg:0"
+format = "[ $symbol $version ]($style)"
+
+[rust]
+symbol = ""
+style = "bg:4 fg:0"
+format = "[ $symbol $version ]($style)"
+
+[golang]
+symbol = ""
+style = "bg:4 fg:0"
+format = "[ $symbol $version ]($style)"
+
+[nix_shell]
+symbol = ""
+style = "bg:4 fg:0"
+format = "[ $symbol $state ]($style)"
+
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:5 fg:0"
+format = "[  $time ]($style)"
+
+[character]
+success_symbol = "[❯](bold 4)"
+error_symbol = "[❯](bold 1)"
+vimcmd_symbol = "[❮](bold 5)"

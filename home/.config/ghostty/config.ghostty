@@ -1,0 +1,8 @@
+
+font-family = Maple Mono NF
+font-size = 9
+font-style = medium
+freetype-load-flags = no-light
+config-file = themes/noctalia
+theme = noctalia
+config-file = themes/noctalia-extra

@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+# shot-record start "X,Y WxH" [desktop] [mic] | stop | toggle-running
+state="${XDG_RUNTIME_DIR:-/tmp}/shot-record.pid"
+node() { wpctl inspect "$1" | sed -n "s/.*node.name = \"\(.*\)\"/\1/p"; }
+running() { [[ -s $state ]] && kill -0 "$(cat "$state")" 2>/dev/null; }
+case ${1:-} in
+  running) running ;;
+  stop)
+    [[ -e $state || -e $state.btn ]] || exit 1
+    touch "$state.stopping"
+    kill "$(cat "$state.btn" 2>/dev/null)" 2>/dev/null; rm -f "$state.btn"
+    worked=0
+    if running; then
+      worked=1; pid=$(cat "$state"); kill -INT "$pid"
+      for _ in {1..100}; do kill -0 "$pid" 2>/dev/null || break; sleep 0.05; done
+    fi
+    file=$(cat "$state.file" 2>/dev/null); rm -f "$state" "$state.file" "$state.stopping"
+    if (( worked )); then notify-send -a Screenshot "Recording saved" "$file"
+    else notify-send -a Screenshot "Recording stopped" "The recorder had already quit. Nothing usable was saved."; fi ;;
+  start)
+    running && exit 0
+    geom=$2; shift 2
+    dir="$HOME/Videos/Recordings"; mkdir -p "$dir"
+    file="$dir/rec-$(date +%Y-%m-%d_%H-%M-%S).mp4"
+    args=(-g "$geom" -f "$file" -c h264_nvenc -y --no-dmabuf -D)
+    for a in "$@"; do
+      [[ $a == desktop ]] && args+=(--audio="$(node @DEFAULT_AUDIO_SINK@).monitor")
+      [[ $a == mic && " $* " != *" desktop "* ]] && args+=(--audio="$(node @DEFAULT_AUDIO_SOURCE@)")
+    done
+    wf-recorder "${args[@]}" >"${state%.pid}.log" 2>&1 &
+    echo $! > "$state"; echo "$file" > "$state.file"; disown
+    sleep 0.4
+    if running; then
+      QML_IMPORT_PATH="$HOME/.nix-profile/lib/qt-6/qml" setsid qs -p "$HOME/.config/quickshell/shot-stop" >/dev/null 2>&1 &
+      echo $! > "$state.btn"; disown
+      # If the recorder dies, close the Stop button and report it.
+      ( while running; do sleep 0.5; done; [[ -e $state && ! -e $state.stopping ]] && "$0" stop ) >/dev/null 2>&1 &
+      disown
+    else rm -f "$state" "$state.file"; notify-send -a Screenshot "Recording failed" "$(tail -1 "${state%.pid}.log")"; exit 1; fi ;;
+  *) exit 2 ;;
+esac

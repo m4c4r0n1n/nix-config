@@ -1,0 +1,3 @@
+theme = noctalia
+background-opacity = 0.85
+app-notifications = no-config-reload

@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# One-time Steam login so the wallpaper panel can download Workshop items.
+# steamcmd gets its own folder so it never touches the Steam app's login.
+root="$HOME/.local/share/wall-sites-steam"
+mkdir -p "$root" "$HOME/.config/wall-sites"
+read -rp "Steam username: " user
+log=$(mktemp)
+HOME="$root" steamcmd +login "$user" +quit | tee "$log"
+if grep -qE 'Waiting for user info\.\.\.+.*OK|Logged in OK' "$log"; then
+  printf '%s\n' "$user" > "$HOME/.config/wall-sites/steam-user"
+  echo "Done. Steam Workshop tiles now download and set directly."
+else
+  echo "Login failed, so nothing was saved. Run steamcmd-login again."
+fi
+rm -f "$log"

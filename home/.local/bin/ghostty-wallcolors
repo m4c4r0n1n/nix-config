@@ -1,0 +1,90 @@
+#!/usr/bin/env python3
+"""Build Ghostty's terminal colours from the wallpaper's actual pixels."""
+import colorsys, os, re, signal, subprocess, sys, tomllib
+
+HOME = os.path.expanduser("~")
+OUT = HOME + "/.config/ghostty/themes/noctalia-extra"
+
+
+SETTINGS_FILE = HOME + "/.local/state/noctalia/settings.toml"
+
+
+def current_wallpaper():
+    """Reads Noctalia's settings with a real parser, so reformatting cannot break it."""
+    with open(SETTINGS_FILE, "rb") as f:
+        data = tomllib.load(f).get("wallpaper", {})
+    for entry in list(data.get("monitors", {}).values()) + [data.get("last", {}), data.get("default", {})]:
+        if isinstance(entry, dict) and entry.get("path"):
+            return entry["path"]
+    raise OSError("no wallpaper set")
+
+
+def wallpaper():
+    path = os.environ.get("NOCTALIA_WALLPAPER_PATH")
+    if path and os.path.exists(path):
+        return path
+    return current_wallpaper()
+
+
+def colours(path):
+    out = subprocess.run(
+        ["magick", path + "[0]", "-sample", "400x", "-colors", "96", "-format", "%c", "histogram:info:"],
+        capture_output=True, text=True, timeout=40).stdout
+    found = []
+    for count, hexa in re.findall(r"^\s*(\d+):.*?#([0-9A-Fa-f]{6})", out, re.M):
+        r, g, b = (int(hexa[i:i + 2], 16) / 255 for i in (0, 2, 4))
+        h, l, s = colorsys.rgb_to_hls(r, g, b)
+        found.append((int(count), h, l, s, max(r, g, b) - min(r, g, b)))
+    return found
+
+
+def shade(h, s, l):
+    r, g, b = colorsys.hls_to_rgb(h, min(l, 0.95), min(s, 1))
+    return "#%02x%02x%02x" % (round(r * 255), round(g * 255), round(b * 255))
+
+
+def apart(a, b):
+    return min(abs(a - b), 1 - abs(a - b))
+
+
+def picks(found):
+    """Hues that matter: vivid colours count for more than large grey areas."""
+    total = sum(c[0] for c in found) or 1
+    vivid = [c for c in found if c[4] > 0.12 and 0.07 < c[2] < 0.96]
+    scored = sorted(vivid, key=lambda c: (c[0] / total) ** 0.5 * c[4], reverse=True)
+    chosen = []
+    for count, h, l, s, chroma in scored:
+        if all(apart(h, x[0]) > 0.075 for x in chosen):
+            chosen.append((h, s, chroma))
+        if len(chosen) == 6:
+            break
+    return chosen
+
+
+def palette(found):
+    hues = picks(found)
+    if not hues:  # a truly grey wallpaper gets grey terminal colours
+        hues = [(0, 0, 0)]
+    base_h, base_s = hues[0][0], hues[0][1]
+    slots = {0: shade(base_h, base_s * 0.4, 0.14), 8: shade(base_h, base_s * 0.4, 0.45)}
+    count = len(hues)
+    for n, slot in enumerate((1, 2, 3, 4, 5, 6)):
+        h, s, chroma = hues[n % count]
+        # Real hues stay readable; faint tints stay faint instead of being invented.
+        s = max(s, 0.45) if chroma >= 0.25 else s
+        step = n // count
+        slots[slot] = shade(h, s, 0.66 + 0.04 * step)
+        slots[slot + 8] = shade(h, s, 0.76 + 0.03 * step)
+    slots[7] = shade(base_h, base_s * 0.3, 0.8)
+    slots[15] = shade(base_h, base_s * 0.3, 0.93)
+    slots[67], slots[208] = slots[4], slots[3]
+    return slots
+
+
+slots = palette(colours(wallpaper()))
+
+with open(OUT, "w") as f:
+    f.write("# Written by ghostty-wallcolors from the wallpaper's real colours.\n")
+    for k in sorted(slots):
+        f.write(f"palette = {k}={slots[k]}\n")
+subprocess.run(["pkill", "-USR2", "-x", ".ghostty-wrappe"])

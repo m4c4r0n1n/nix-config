@@ -1,0 +1,8 @@
+root is just a state of mind
+have you tried turning the kernel off and on again?
+it's not a bug, it's an undocumented feature
+trust the process (PID 1)
+sudo make me a sandwich
+the cake is a lie, but the shell is real
+404: motivation not found
+rm -rf /regrets

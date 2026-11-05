@@ -1,0 +1,59 @@
+--- a/src/settings.cpp	2026-11-05 02:36:15.748037584 -0500
++++ b/src/settings.cpp	2026-11-05 02:36:15.774823663 -0500
+@@ -1,6 +1,12 @@
+ // Settings: reads and writes config.txt, converts colour names to terminal codes, and holds the
+ // defaults and the key bindings of the program.
+ #include "settings.h"
++#include <sys/stat.h>
++#include <cstdio>
++#include <cstdlib>
++#include <ctime>
++#include <fstream>
++#include <mutex>
+ #include "utf8_util.h"
+ #include "string_util.h"
+ #include "keyboard_layout.h"
+@@ -81,7 +87,43 @@
+ namespace {
+ struct RGB { int r, g, b; };
+ 
++// Gradients are computed here, so they must use the terminal's real colours.
++// Ghostty's wallpaper palette is re-read whenever the file changes.
++bool ghostty_palette_rgb(int idx, RGB& out) {
++    static std::mutex lock;
++    static RGB colours[256];
++    static bool known[256] = {};
++    static time_t checked = 0, stamp = 0;
++    std::lock_guard<std::mutex> guard(lock);
++    const time_t now = time(nullptr);
++    if (now != checked) {
++        checked = now;
++        const char* home = getenv("HOME");
++        const std::string path = std::string(home ? home : "") +
++                                 "/.config/ghostty/themes/noctalia-extra";
++        struct stat info;
++        if (stat(path.c_str(), &info) == 0 && info.st_mtime != stamp) {
++            stamp = info.st_mtime;
++            std::ifstream in(path);
++            std::string line;
++            while (std::getline(in, line)) {
++                int slot, r, g, b;
++                if (sscanf(line.c_str(), "palette = %d=#%2x%2x%2x", &slot, &r, &g, &b) == 4 &&
++                    slot >= 0 && slot < 256) {
++                    colours[slot] = {r, g, b};
++                    known[slot] = true;
++                }
++            }
++        }
++    }
++    if (idx < 0 || idx > 255 || !known[idx]) return false;
++    out = colours[idx];
++    return true;
++}
++
+ RGB ansi256_to_rgb(int idx) {
++    RGB live;
++    if (ghostty_palette_rgb(idx, live)) return live;
+     // Standard 16 colors (0-15)
+     static const RGB basic16[16] = {
+         {0,0,0}, {128,0,0}, {0,128,0}, {128,128,0},

@@ -1,0 +1,49 @@
+--- a/src/youtube_source.cpp	2026-11-05 03:09:48.808046345 -0500
++++ b/src/youtube_source.cpp	2026-11-05 04:15:31.188812784 -0500
+@@ -11,7 +11,6 @@
+ // gives us a title before we commit to a deterministic cache filename.
+ static bool probe_title(const std::string& query, std::string& id, std::string& title, std::string& artist) {
+     ProcResult r = run_capture({"yt-dlp", "-4", "--no-warnings",
+-                                "--extractor-args", "youtube:player_client=android;player_skip=webpage,configs,js",
+                                 "--match-filters", "categories *= 'Music' & duration >= 90",
+                                 "--flat-playlist", "--print", "%(id)s\t%(title)s\t%(uploader)s",
+                                 "ytsearch10:" + query});
+@@ -56,8 +55,8 @@
+ 
+     const std::string url = "https://www.youtube.com/watch?v=" + id;
+     ProcResult r = run_capture({"yt-dlp", "-4", "--no-warnings",
+-                                "--extractor-args", "youtube:player_client=android;player_skip=webpage,configs,js",
+                                 "-x", "-f", "bestaudio/best", "--audio-format", "opus", "--audio-quality", "0",
++                                "--embed-thumbnail", "--convert-thumbnails", "jpg",
+                                 "-o", path_utf8(cached.parent_path() / cached.stem()) + ".%(ext)s", url}, /*merge_stderr=*/true);
+ 
+     if (!cache_.is_cached(title, "opus")) {
+@@ -83,6 +82,7 @@
+         if (auto hit = find_cached()) return SongResult{title, artist, *hit, true};
+         const fs::path stem = cache_.path_for(title, "opus");
+         ProcResult r = run_capture({"yt-dlp", "--no-warnings", "-x", "-f", "bestaudio/best",
++                                    "--embed-thumbnail", "--convert-thumbnails", "jpg",
+                                     "-o", path_utf8(stem.parent_path() / stem.stem()) + ".%(ext)s", video_id}, /*merge_stderr=*/true);
+         if (auto got = find_cached()) return SongResult{title, artist, *got, false};
+         if (error_out) *error_out = "yt-dlp download failed:\n" + r.out;
+@@ -96,8 +96,8 @@
+ 
+     const std::string url = "https://www.youtube.com/watch?v=" + video_id;
+     ProcResult r = run_capture({"yt-dlp", "-4", "--no-warnings",
+-                                "--extractor-args", "youtube:player_client=android;player_skip=webpage,configs,js",
+                                 "-x", "-f", "bestaudio/best", "--audio-format", "opus", "--audio-quality", "0",
++                                "--embed-thumbnail", "--convert-thumbnails", "jpg",
+                                 "-o", path_utf8(cached.parent_path() / cached.stem()) + ".%(ext)s", url}, /*merge_stderr=*/true);
+ 
+     if (!cache_.is_cached(title, "opus")) {
+--- a/src/app_cover.cpp	2026-11-05 03:09:48.808085922 -0500
++++ b/src/app_cover.cpp	2026-11-05 03:09:48.837064120 -0500
+@@ -139,7 +139,7 @@
+ }
+ 
+ const CoverImage* App::player_cover() const {
+-    if (audiobook_ || !settings_.element_disk || !has_track_ || !current_is_local_ || current_path_.empty() || !eff_album_cover()) return nullptr;
++    if (audiobook_ || !settings_.element_disk || !has_track_ || current_path_.empty() || !eff_album_cover()) return nullptr;
+     const TrackMetadata md = display_metadata();
+     CoverRequest rq;
+     rq.path = path_utf8(current_path_);

@@ -1,0 +1,30 @@
+--- a/thunar/thunar-file.c	2026-11-05 04:15:31.169794116 -0500
++++ b/thunar/thunar-file.c	2026-11-05 04:15:31.188578901 -0500
+@@ -4135,6 +4135,27 @@
+                           break;
+                         }
+                     }
++
++                  /* Local patch: icons for folders outside the XDG special dirs */
++                  if (*special_names == NULL)
++                    {
++                      static const gchar *const custom_dirs[][2] = {
++                        { "Anime", "folder-videos" },
++                        { "Manga", "folder-bookmark" },
++                        { "Projects", "folder-development" },
++                      };
++                      for (i = 0; i < G_N_ELEMENTS (custom_dirs); i++)
++                        {
++                          gchar *custom = g_build_filename (xfce_get_homedir (), custom_dirs[i][0], NULL);
++                          gboolean match = strcmp (path, custom) == 0;
++                          g_free (custom);
++                          if (match)
++                            {
++                              *special_names = custom_dirs[i][1];
++                              break;
++                            }
++                        }
++                    }
+                 }
+ 
+               g_free (path);

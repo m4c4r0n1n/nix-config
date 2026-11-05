@@ -1,0 +1,11 @@
+# Launcher: app grid, search on top, tidy category tabs.
+[shell.launcher]
+app_grid = true
+search_position = "top"
+width = 900
+default_view = "all"
+category_icons_only = true
+
+[shell.panel]
+transparency_mode = "soft"
+list_item_background = true

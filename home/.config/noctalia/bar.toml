@@ -1,0 +1,58 @@
+# Top bar: edge to edge, pill widgets, visualizer beside the clock, CPU/GPU temps.
+[bar.default]
+margin_ends = 0
+padding = 6
+capsule = true
+capsule_fill = "surface_container"
+capsule_opacity = 1.0
+background_opacity = 0.0
+border_width = 0.0
+shadow = false
+compositor_blur = false
+concave_edge_corners = false
+start = ["wallpaper", "live", "wallhaven", "workspaces"]
+center = ["cava", "clock"]
+end = ["weather", "hdr", "cpu-temp", "gpu-temp", "media", "tray", "notifications", "network", "bluetooth", "volume", "brightness", "battery", "control-center", "session"]
+
+[bar.default.dead_zone]
+click_through = true
+
+[widget.cava]
+type = "audio_visualizer"
+width = 62
+bands = 10
+mirrored = true
+centered = true
+show_when_idle = false
+capsule = false
+
+[widget.cpu-temp]
+type = "sysmon"
+stat = "cpu_temp"
+glyph = "cpu"
+visualization = "none"
+
+[widget.gpu-temp]
+type = "sysmon"
+stat = "gpu_temp"
+glyph = "cpu-2"
+visualization = "none"
+
+[widget.live]
+type = "noctalia/mpvpaper:mpvpaper"
+
+[widget.hdr]
+type = "custom_button"
+glyph = "sun"
+tooltip = "Toggle SDR / HDR"
+
+[widget.hdr.actions]
+left = "exec /home/chrome/.local/bin/hdr-toggle"
+
+[widget.wallhaven]
+type = "noctalia/wallhaven:wallhaven"
+
+# Nix flake instead of the Noctalia logo; tinted by the theme.
+[widget.control-center]
+custom_image = "~/.config/noctalia/nix-flake.png"
+custom_image_colorize = true

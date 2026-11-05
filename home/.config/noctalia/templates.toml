@@ -1,0 +1,12 @@
+[theme]
+mode = "dark"
+pure_black_dark = true
+
+[theme.templates]
+enable_builtin_templates = true
+builtin_ids = ["umbriel", "gtk3", "gtk4", "kcolorscheme", "qt", "ghostty"]
+
+[theme.templates.user.discord_wall]
+input_path = "$XDG_CONFIG_HOME/noctalia/templates/discord-wall.css"
+output_path = "$XDG_CONFIG_HOME/vesktop/themes/Discord-Wall.theme.css"
+post_hook = "sed -i \"s/current?v=[0-9]*/current?v=$(date +%s)/\" $HOME/.config/vesktop/themes/Discord-Wall.theme.css"

@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Opens Mousiki Plus in its own floating window, using the Wallpaper theme.
+# That theme uses Ghostty's palette slots, so it follows the wallpaper.
+c=$HOME/.config/mousiki
+if [ -f "$c/config.txt" ] && ! pgrep -f 'lib/mousiki/mousiki' >/dev/null; then
+  awk -F= 'FNR==NR { if (/^\[/) on = ($0 == "[Wallpaper]")
+                     else if (on && /^Color/) v[$1] = $0
+                     next }
+           ($1 in v) { print v[$1]; next } 1' \
+    "$c/themes.txt" "$c/config.txt" > "$c/config.tmp" && mv "$c/config.tmp" "$c/config.txt"
+fi
+exec ghostty --title=mousiki --font-size=10 --window-padding-x=10 --window-padding-y=8 -e mousiki "$@"

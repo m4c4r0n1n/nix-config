@@ -1,0 +1,320 @@
+#!/usr/bin/env python3
+"""Lists video wallpapers from MotionBGs, LiveBgs and MoeWalls for the Noctalia panel.
+
+Output: first line is the page count, then id, title, thumbnail, url, extension,
+separated by tabs. Parsing lives here because Noctalia limits plugin CPU time.
+"""
+import concurrent.futures, fcntl, html, json, os, re, shutil, signal, subprocess, sys, time, urllib.parse, urllib.request
+
+AGENT = "Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0"
+LIVEBGS_PAGE = 24
+WPE_PAGE = 24
+STEAM = os.path.expanduser("~/.local/share/Steam/steamapps")
+WPE_ITEMS = STEAM + "/workshop/content/431960"
+WPE_ASSETS = STEAM + "/common/wallpaper_engine/assets"
+THUMBS = os.path.expanduser("~/.local/state/noctalia/wallhaven/thumbs")
+STEAM_HOME = os.path.expanduser("~/.local/share/wall-sites-steam")
+STEAM_USER = os.path.expanduser("~/.config/wall-sites/steam-user")
+WPE_LAST = os.path.expanduser("~/.local/state/noctalia/wpe-last")
+WPE_HOLD = "/run/user/%d/wpe-hold" % os.getuid()
+
+
+def get(url):
+    request = urllib.request.Request(url, headers={"User-Agent": AGENT})
+    with urllib.request.urlopen(request, timeout=20) as response:
+        return response.read().decode("utf-8", "replace")
+
+
+def tidy(title):
+    title = html.unescape(title)
+    title = re.sub(r"\s*live wallpapers?.*$", "", title, flags=re.I)
+    return " ".join(title.split())
+
+
+def motionbgs(query, page):
+    if query:
+        url = "https://motionbgs.com/search?q=%s&page=%d" % (urllib.parse.quote_plus(query), page)
+    else:
+        url = "https://motionbgs.com/tag:anime/%d/" % page
+    body = get(url)
+    items = []
+    for match in re.finditer(r'<a title="([^"]*)" href=/[\w-]+> <figure>(.*?)</figure>', body, re.S):
+        found = re.search(r"/i/c/546x308/media/(\d+)/([^\s>]+?\.jpg)\s", match.group(2))
+        if found:
+            media, name = found.groups()
+            items.append(("motionbgs-" + media, tidy(match.group(1)),
+                          "https://motionbgs.com/i/c/546x308/media/%s/%s" % (media, name),
+                          "https://motionbgs.com/dl/4k/%s/" % media, ".mp4"))
+    pages = [int(n) for n in re.findall(r"/tag:[\w-]+/(\d+)/", body)]
+    return max(pages + [page + 1 if len(items) >= 36 else page]), items
+
+
+def livebgs(query, page):
+    params = {"limit": LIVEBGS_PAGE, "offset": (page - 1) * LIVEBGS_PAGE}
+    method = "getLatest"
+    if query:
+        params["query"] = query
+        method = "search"
+    text = json.dumps({"0": {"json": params}}, separators=(",", ":"))
+    url = "https://livebgs.com/api/trpc/wallpapers.%s?batch=1&input=%s" % (method, urllib.parse.quote(text))
+    entries = json.loads(get(url))[0]["result"]["data"]["json"] or []
+    items = []
+    for entry in entries:
+        link = entry.get("fourKUrl") or entry.get("hdUrl")
+        if link and entry.get("type") == "LIVE_MP4":
+            items.append(("livebgs-%s" % entry["id"], tidy(entry.get("title") or ""),
+                          entry.get("thumbnailImageUrl") or "", link, ".mp4"))
+    return (page + 1 if len(entries) >= LIVEBGS_PAGE else page), items
+
+
+def moewalls(query, page):
+    url = "https://moewalls.com/page/%d/" % page
+    if query:
+        url += "?s=" + urllib.parse.quote_plus(query)
+    body = get(url)
+    items, seen = [], set()
+    for title, link, thumb in re.findall(
+            r'<a title="([^"]*)" class="g1-frame" href="(https://moewalls\.com/[^"]+)">'
+            r'<div class="g1-frame-inner"><img [^>]*?src="([^"]+)"', body):
+        if link not in seen:
+            seen.add(link)
+            slug = link.rstrip("/").rsplit("/", 1)[-1]
+            items.append(("moewalls-" + slug, tidy(title), thumb, link, ".webm"))
+    pages = [int(n) for n in re.findall(r"/page/(\d+)/", body)]
+    return max(pages + [page]), items
+
+
+def wpe_catalog(query):
+    items = []
+    for item in os.listdir(WPE_ITEMS):
+        try:
+            with open("%s/%s/project.json" % (WPE_ITEMS, item), errors="replace") as handle:
+                project = json.load(handle)
+        except (OSError, ValueError):
+            continue
+        title = " ".join(str(project.get("title") or item).split())
+        if str(project.get("type")).lower() in ("scene", "video") and query.lower() in title.lower():
+            items.append((title.lower(), title, item, project.get("preview") or ""))
+    return sorted(items)
+
+
+def wpe_thumb(item, preview):
+    """Returns a still image path; animated previews become their first frame."""
+    source = "%s/%s/%s" % (WPE_ITEMS, item, preview)
+    if not preview.lower().endswith(".gif"):
+        return source
+    target = "%s/wpe-%s.jpg" % (THUMBS, item)
+    tool = shutil.which("ffmpeg")
+    if not os.path.exists(target) and tool:
+        os.makedirs(THUMBS, exist_ok=True)
+        subprocess.run([tool, "-v", "error", "-y", "-i", source, "-frames:v", "1", target],
+                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=15)
+    return target
+
+
+def wpe(query, page):
+    catalog = wpe_catalog(query)
+    chosen = catalog[(page - 1) * WPE_PAGE:page * WPE_PAGE]
+    with concurrent.futures.ThreadPoolExecutor(6) as pool:
+        thumbs = list(pool.map(lambda row: wpe_thumb(row[2], row[3]), chosen))
+    items = [("wpe-" + row[2], tidy(row[1]), thumb, row[2], ".wpe") for row, thumb in zip(chosen, thumbs)]
+    return max(1, (len(catalog) + WPE_PAGE - 1) // WPE_PAGE), items
+
+
+def wpe_launch(item):
+    subprocess.Popen(["linux-wallpaperengine", "--screen-root", "DP-1", "--bg", "%s/%s" % (WPE_ITEMS, item),
+                      "--assets-dir", WPE_ASSETS, "--scaling", "fill", "--silent"],
+                     stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                     start_new_session=True)
+
+
+def wpe_stop():
+    # Noctalia fires its wallpaper hook while it starts, so a restore in progress is left alone.
+    try:
+        if time.time() - os.path.getmtime(WPE_HOLD) < 30:
+            return
+    except OSError:
+        pass
+    subprocess.run(["pkill", "-f", "^(.*/)?[.]?linux-wallpaperengine --screen-root"], stderr=subprocess.DEVNULL)
+    try:
+        os.remove(WPE_LAST)
+    except OSError:
+        pass
+
+
+def wpe_restore():
+    """Brings back the last Wallpaper Engine item after login."""
+    try:
+        with open(WPE_LAST) as handle:
+            item = handle.read().strip()
+    except OSError:
+        return
+    if not item:
+        return
+    with open(WPE_HOLD, "w"):
+        pass
+    time.sleep(20)
+    if os.environ.get("WPE_DRY"):
+        print("would launch", item)
+        return
+    wpe_launch(item)
+
+
+def wpe_hold(seconds):
+    """Makes wpe-stop ignore the wallpaper hook for a short time."""
+    with open(WPE_HOLD, "w"):
+        pass
+    now = time.time() - (30 - seconds)
+    os.utime(WPE_HOLD, (now, now))
+
+
+def forget_static():
+    """Lets the wallpaper hook run again if the same still is picked next."""
+    try:
+        os.remove("/run/user/%d/wall-static-last" % os.getuid())
+    except OSError:
+        pass
+
+
+def wpe_apply(item):
+    forget_static()
+    wpe_hold(30)
+    subprocess.run(["noctalia", "msg", "plugin", "noctalia/mpvpaper:service", "all", "clear-all"],
+                   stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    subprocess.run(["pkill", "-f", "^(.*/)?[.]?linux-wallpaperengine --screen-root"], stderr=subprocess.DEVNULL)
+    wpe_launch(item)
+    with open(WPE_LAST, "w") as handle:
+        handle.write(item)
+    wpe_hold(8)  # long enough for the hook from clearing a live wallpaper
+
+
+def steam(query, page):
+    params = {"appid": 431960, "section": "readytouseitems", "numperpage": 24, "p": page}
+    if query:
+        params.update(searchtext=query, browsesort="textsearch", actualsort="textsearch")
+    else:
+        params.update(browsesort="trend", actualsort="trend", days=7)
+    body = get("https://steamcommunity.com/workshop/browse/?" + urllib.parse.urlencode(params))
+    data = body.replace('\\\\"', "\x00").replace('\\"', '"')
+    items, seen = [], set()
+    for found in re.finditer(r'"publishedfileid":"(\d+)"(?:(?!"publishedfileid").)*?"preview_url":"([^"]+)","title":"([^"]*)"', data, re.S):
+        item, picture, title = found.groups()
+        if item not in seen:
+            seen.add(item)
+            title = title.replace("\x00", '"')
+            items.append(("steam-" + item, tidy(title), picture.replace("\\/", "/") + "?imw=480&imh=270&ima=fit", item, ".steam"))
+    total = re.search(r"([\d,]+) entries", body)
+    count = int(total.group(1).replace(",", "")) if total else len(items)
+    return max(page, (count + 23) // 24), items[:24]
+
+
+def notify(title, message, urgent=False):
+    command = ["notify-send", "-a", "Wallpapers"]
+    if urgent:
+        command += ["-u", "critical"]
+    subprocess.run(command + [title, message], stderr=subprocess.DEVNULL)
+
+
+def steam_download(item):
+    """Returns an error message, or None when the item is in the library."""
+    try:
+        with open(STEAM_USER) as handle:
+            user = handle.read().strip()
+    except OSError:
+        user = ""
+    if not user:
+        return "Steam login needed: run steamcmd-login in a terminal."
+    target = "%s/%s" % (WPE_ITEMS, item)
+    os.makedirs(STEAM_HOME, exist_ok=True)
+    with open(STEAM_HOME + "/download.lock", "w") as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)  # steamcmd cannot run twice at once
+        if os.path.isdir(target):
+            return None
+        run = subprocess.run(["steamcmd", "+login", user, "+workshop_download_item", "431960", item, "+quit"],
+                             stdin=subprocess.DEVNULL, capture_output=True, text=True, timeout=3000,
+                             env=dict(os.environ, HOME=STEAM_HOME))
+        if "Invalid Password" in run.stdout:
+            return "Steam login expired: run steamcmd-login in a terminal."
+        found = re.search(r'Success\. Downloaded item \d+ to "([^"]+)"', run.stdout)
+        if not found:
+            lines = [line for line in re.sub(r"\x1b\[[0-9;]*m", "", run.stdout).splitlines() if "ERROR" in line]
+            return lines[-1][:160] if lines else "steamcmd did not finish the download."
+        if os.path.realpath(found.group(1)) != os.path.realpath(target):
+            os.makedirs(WPE_ITEMS, exist_ok=True)
+            shutil.move(found.group(1), target)
+    return None
+
+
+def steam_fetch(item, title):
+    problem = steam_download(item)
+    if problem:
+        notify("Steam Workshop", problem, True)
+        return
+    if not os.environ.get("WALL_SITES_NO_APPLY"):
+        wpe_apply(item)
+    notify("Steam Workshop", title + " is set.")
+
+
+def video_fetch(item, extension, url, title):
+    """Downloads a live wallpaper, then sets it. Runs detached from the panel."""
+    folder = os.path.expanduser("~/Pictures/Live Wallpapers")
+    dest = "%s/%s%s" % (folder, item, extension)
+    os.makedirs(folder, exist_ok=True)
+    if not (os.path.exists(dest) and os.path.getsize(dest) > 0):
+        if extension == ".webm":
+            found = re.search(r'<source src="(/wp-content/uploads/preview/[^"]+)"', get(url))
+            if not found:
+                notify("Wallpapers", "No video found for " + title, True)
+                return
+            url = "https://moewalls.com" + found.group(1)
+        part = dest + ".part"
+        result = subprocess.run(["curl", "-fsSL", "-A", AGENT, "-o", part, url], stderr=subprocess.DEVNULL)
+        if result.returncode != 0:
+            if os.path.exists(part):
+                os.remove(part)
+            notify("Wallpapers", "Download failed: " + title, True)
+            return
+        os.rename(part, dest)
+    if not os.environ.get("WALL_SITES_NO_APPLY"):
+        forget_static()
+        wpe_stop()
+        subprocess.run(["noctalia", "msg", "plugin", "noctalia/mpvpaper:service", "all", "set", dest],
+                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    notify("Wallpapers", title + " is set.")
+
+
+def preview(link):
+    """Prints the public preview video for a MoeWalls page."""
+    found = re.search(r'<source src="(/wp-content/uploads/preview/[^"]+)"', get(link))
+    if not found:
+        sys.exit(1)
+    print("https://moewalls.com" + found.group(1))
+
+
+def main():
+    if sys.argv[1] == "preview":
+        preview(sys.argv[2])
+        return
+    if sys.argv[1] == "steam-fetch":
+        steam_fetch(sys.argv[2], sys.argv[3])
+        return
+    if sys.argv[1] == "video-fetch":
+        video_fetch(*sys.argv[2:6])
+        return
+    if sys.argv[1] == "wpe-apply":
+        wpe_apply(sys.argv[2])
+        return
+    if sys.argv[1] == "wpe-stop":
+        wpe_stop()
+        return
+    if sys.argv[1] == "wpe-restore":
+        wpe_restore()
+        return
+    site, page, query = sys.argv[1], int(sys.argv[2]), " ".join(sys.argv[3:]).strip()
+    pages, items = {"motionbgs": motionbgs, "livebgs": livebgs, "moewalls": moewalls, "wpe": wpe, "steam": steam}[site](query, page)
+    print(pages)
+    for item in items:
+        print("\t".join(field.replace("\t", " ") for field in item))
+
+
+main()

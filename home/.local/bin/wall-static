@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Noctalia hook: choosing a real wallpaper stops any live wallpaper.
+# The live plugin's own preview images live in the cache, so they are ignored.
+# Noctalia fires this hook twice per change, so the repeat is skipped.
+seen="${XDG_RUNTIME_DIR:-/tmp}/wall-static-last"
+[[ -n ${NOCTALIA_WALLPAPER_PATH:-} && -r $seen && $(<"$seen") == "$NOCTALIA_WALLPAPER_PATH" ]] && exit 0
+printf '%s' "${NOCTALIA_WALLPAPER_PATH:-}" > "$seen"
+"$HOME/.local/bin/ghostty-wallcolors" &
+"$HOME/.local/bin/wall-sites" wpe-stop
+case ${NOCTALIA_WALLPAPER_PATH:-} in
+  "$HOME"/.cache/*|"") exit 0 ;;
+esac
+# Only clear when a live wallpaper is really playing, because clearing fires this hook again.
+pgrep -x mpvpaper >/dev/null || exit 0
+exec noctalia msg plugin noctalia/mpvpaper:service all clear-all

@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# Read text from an image and copy it to the clipboard.
+text="$(tesseract "$1" - 2>/dev/null)"
+if [[ -z ${text//[[:space:]]/} ]]; then
+  notify-send -a Screenshot "OCR" "No text found"
+  exit 0
+fi
+printf "%s" "$text" | wl-copy
+notify-send -a Screenshot "OCR" "Text copied to clipboard"

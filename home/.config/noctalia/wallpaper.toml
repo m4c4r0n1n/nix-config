@@ -1,0 +1,8 @@
+[wallpaper]
+directory = "/home/chrome/Pictures/Wallpapers"
+fill_mode = "stretch"
+
+[plugin_settings."noctalia/mpvpaper"]
+video_directory = "/home/chrome/Pictures/Live Wallpapers"
+extract_last_frame = false
+mpv_options = "keepaspect=no panscan=0"
