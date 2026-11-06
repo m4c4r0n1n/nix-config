@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
-"""Serve Noctalia's current wallpaper on localhost, for the Discord theme."""
 import http.server, mimetypes, os, shutil, tomllib
 
 SETTINGS_FILE = os.path.expanduser("~/.local/state/noctalia/settings.toml")
 
 
 def current_wallpaper():
-    """Reads Noctalia's settings with a real parser, so reformatting cannot break it."""
     with open(SETTINGS_FILE, "rb") as f:
         data = tomllib.load(f).get("wallpaper", {})
     for entry in list(data.get("monitors", {}).values()) + [data.get("last", {}), data.get("default", {})]:
