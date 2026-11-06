@@ -17,8 +17,7 @@
 
 <table>
   <tr>
-    <img width="945" height="808" alt="image" src="https://github.com/user-attachments/assets/d6882909-028f-4850-a62c-92632629c2ef" />
-</td>
+    <td width="50%"><img src="https://github.com/user-attachments/assets/d6882909-028f-4850-a62c-92632629c2ef" width="100%" alt="Wallpaper browser on the Wallhaven tab" /></td>
     <td width="50%"><img src="https://github.com/user-attachments/assets/f7d46f26-1eea-4ca4-8b02-3738065a6326" width="100%" alt="Wallpaper browser on the Steam Workshop tab" /></td>
   </tr>
 </table>
