@@ -1,0 +1,272 @@
+diff --git a/src/Surface.zig b/src/Surface.zig
+index 369bb23..33d2df5 100644
+--- a/src/Surface.zig
++++ b/src/Surface.zig
+@@ -228,6 +228,11 @@ const Search = struct {
+ 
+ /// Mouse state for the surface.
+ const Mouse = struct {
++    kitty_drag_enabled: bool = false,
++    kitty_drag_sent: bool = false,
++    kitty_drag_x: u32 = 0,
++    kitty_drag_y: u32 = 0,
++
+     /// The last tracked mouse button state by button, indexed by the
+     /// button's enum value. `max` is the largest value, not a count, so
+     /// the array needs one more slot than that to hold every button.
+@@ -1016,6 +1021,15 @@ pub fn needsConfirmQuit(self: *Surface) bool {
+ /// surface.
+ pub fn handleMessage(self: *Surface, msg: Message) !void {
+     switch (msg) {
++        .kitty_drag_enable => |v| self.mouse.kitty_drag_enabled = v,
++
++        .kitty_drag_start => |w| {
++            defer w.deinit();
++            if (@hasDecl(apprt.runtime.Surface, "startDrag")) {
++                self.rt_surface.startDrag(w.slice());
++            }
++        },
++
+         .change_config => |config| try self.updateConfig(config),
+ 
+         .set_title => |*v| {
+@@ -3915,6 +3929,14 @@ pub fn mouseCaptured(self: *Surface) bool {
+ /// Called for mouse button press/release events. This will return true
+ /// if the mouse event was consumed in some way (i.e. the program is capturing
+ /// mouse events). If the event was not consumed, then false is returned.
++pub fn kittyDragFinished(self: *Surface) void {
++    const seq: []const u8 = "\x1b]72;t=e:x=4\x1b\\";
++    if (termio.Message.writeReq(self.alloc, seq)) |msg| {
++        self.queueIo(msg, .unlocked);
++    } else |_| {}
++    _ = self.mouseButtonCallback(.release, .left, .{}) catch false;
++}
++
+ pub fn mouseButtonCallback(
+     self: *Surface,
+     action: input.MouseButtonState,
+@@ -3935,6 +3957,17 @@ pub fn mouseButtonCallback(
+     // Always record our latest mouse state
+     self.mouse.click_state[@intCast(@backingInt(button))] = action;
+ 
++    if (button == .left) {
++        if (action == .press) {
++            if (self.rt_surface.getCursorPos()) |pos| {
++                const point = self.posToViewport(pos.x, pos.y);
++                self.mouse.kitty_drag_x = @intCast(point.x);
++                self.mouse.kitty_drag_y = @intCast(point.y);
++            } else |_| {}
++        }
++        self.mouse.kitty_drag_sent = false;
++    }
++
+     // Always show the mouse again if it is hidden
+     if (self.mouse.hidden) self.showMouse();
+ 
+@@ -4686,6 +4719,23 @@ pub fn cursorPosCallback(
+ 
+     // log.debug("cursor pos x={} y={} mods={?}", .{ pos.x, pos.y, mods });
+ 
++    if (self.mouse.kitty_drag_enabled and !self.mouse.kitty_drag_sent) {
++        const left: usize = @intCast(@backingInt(input.MouseButton.left));
++        const width: f32 = @floatFromInt(self.size.screen.width);
++        const height: f32 = @floatFromInt(self.size.screen.height);
++        if (self.mouse.click_state[left] == .press and
++            (pos.x < 0 or pos.y < 0 or pos.x >= width or pos.y >= height))
++        {
++            self.mouse.kitty_drag_sent = true;
++            var buf: [64]u8 = undefined;
++            const seq = std.fmt.bufPrint(&buf, "\x1b]72;t=o:x={d}:y={d}\x1b\\", .{
++                self.mouse.kitty_drag_x,
++                self.mouse.kitty_drag_y,
++            }) catch unreachable;
++            self.queueIo(try termio.Message.writeReq(self.alloc, seq), .unlocked);
++        }
++    }
++
+     // If the position is negative, it is outside our viewport and
+     // we need to clear any hover states.
+     if (pos.x < 0 or pos.y < 0) {
+diff --git a/src/apprt/gtk/Surface.zig b/src/apprt/gtk/Surface.zig
+index af9ed72..0c88101 100644
+--- a/src/apprt/gtk/Surface.zig
++++ b/src/apprt/gtk/Surface.zig
+@@ -22,6 +22,10 @@ pub fn gobj(self: *Self) *Surface {
+     return self.surface;
+ }
+ 
++pub fn startDrag(self: *Self, data: []const u8) void {
++    self.surface.startDrag(data);
++}
++
+ pub fn core(self: *Self) *CoreSurface {
+     // This asserts the non-optional because libghostty should only
+     // be calling this for initialized surfaces.
+diff --git a/src/apprt/gtk/class/surface.zig b/src/apprt/gtk/class/surface.zig
+index 92cd597..b036da9 100644
+--- a/src/apprt/gtk/class/surface.zig
++++ b/src/apprt/gtk/class/surface.zig
+@@ -3752,6 +3752,41 @@ pub const Surface = extern struct {
+         return @intFromBool(shown);
+     }
+ 
++    pub fn startDrag(self: *Self, data: []const u8) void {
++        const widget = self.as(gtk.Widget);
++        const native = widget.getNative() orelse return;
++        const surface = native.as(gtk.Native).getSurface() orelse return;
++        const seat = widget.getDisplay().getDefaultSeat() orelse return;
++        const device = seat.getPointer() orelse return;
++
++        const split = std.mem.indexOfScalar(u8, data, 0) orelse data.len;
++        const uris = data[0..split];
++        const text = if (split < data.len) data[split + 1..] else "";
++
++        const uri_bytes = glib.Bytes.new(uris.ptr, uris.len);
++        defer uri_bytes.unref();
++        const text_bytes = glib.Bytes.new(text.ptr, text.len);
++        defer text_bytes.unref();
++        var providers = [_]*gdk.ContentProvider{
++            gdk.ContentProvider.newForBytes("text/uri-list", uri_bytes),
++            gdk.ContentProvider.newForBytes("text/plain;charset=utf-8", text_bytes),
++        };
++        const provider = gdk.ContentProvider.newUnion(&providers, providers.len);
++        defer provider.unref();
++
++        const drag = gdk.Drag.begin(surface, device, provider, .{ .copy = true }, 0, 0) orelse return;
++        _ = gdk.Drag.signals.dnd_finished.connect(drag, *Self, kittyDragFinished, self, .{});
++        _ = gdk.Drag.signals.cancel.connect(drag, *Self, kittyDragCancelled, self, .{});
++    }
++
++    fn kittyDragFinished(_: *gdk.Drag, self: *Self) callconv(.c) void {
++        if (self.core()) |core_surface| core_surface.kittyDragFinished();
++    }
++
++    fn kittyDragCancelled(_: *gdk.Drag, _: gdk.DragCancelReason, self: *Self) callconv(.c) void {
++        if (self.core()) |core_surface| core_surface.kittyDragFinished();
++    }
++
+     fn surfaceDragPrepare(
+         src: *gtk.DragSource,
+         x: f64,
+diff --git a/src/apprt/surface.zig b/src/apprt/surface.zig
+index 3b1a04d..ab95926 100644
+--- a/src/apprt/surface.zig
++++ b/src/apprt/surface.zig
+@@ -116,6 +116,10 @@ pub const Message = union(enum) {
+     /// a window and switching tabs.
+     present_surface: void,
+ 
++    kitty_drag_enable: bool,
++
++    kitty_drag_start: WriteReq,
++
+     /// Notifies the surface that password input has started within
+     /// the terminal. This should always be followed by a false value
+     /// unless the surface exits.
+diff --git a/src/termio/stream_handler.zig b/src/termio/stream_handler.zig
+index 0f1ee50..29fd445 100644
+--- a/src/termio/stream_handler.zig
++++ b/src/termio/stream_handler.zig
+@@ -22,6 +22,10 @@ const log = std.log.scoped(.io_handler);
+ /// unless all of the member fields are copied.
+ pub const StreamHandler = struct {
+     alloc: Allocator,
++    kitty_drag_uri: std.ArrayListUnmanaged(u8) = .empty,
++    kitty_drag_text: std.ArrayListUnmanaged(u8) = .empty,
++    kitty_drag_uri_idx: i32 = -1,
++    kitty_drag_text_idx: i32 = -1,
+     size: *renderer.Size,
+     terminal: *terminal.Terminal,
+ 
+@@ -99,6 +103,8 @@ pub const StreamHandler = struct {
+     pub const tmux_enabled = terminal.options.tmux_control_mode;
+ 
+     pub fn deinit(self: *StreamHandler) void {
++        self.kitty_drag_uri.deinit(self.alloc);
++        self.kitty_drag_text.deinit(self.alloc);
+         self.apc.deinit();
+         self.dcs.deinit();
+         self.kittyClipboardWriteAbort();
+@@ -135,6 +141,69 @@ pub const StreamHandler = struct {
+         // sending to it here would deadlock if the mailbox were full.
+     }
+ 
++    fn kittyDnd(self: *StreamHandler, v: terminal.osc.Command.KittyDndProtocol) !void {
++        const dnd = terminal.kitty.dnd;
++        const meta = dnd.Metadata.parse(v.metadata) orelse return;
++        const t = meta.type orelse return;
++        const payload = v.payload orelse "";
++        switch (t) {
++            .offer => switch (meta.cell_x) {
++                1 => self.surfaceMessageWriter(.{ .kitty_drag_enable = true }),
++                2 => self.surfaceMessageWriter(.{ .kitty_drag_enable = false }),
++                0 => {
++                    self.kitty_drag_uri.clearRetainingCapacity();
++                    self.kitty_drag_text.clearRetainingCapacity();
++                    self.kitty_drag_uri_idx = -1;
++                    self.kitty_drag_text_idx = -1;
++                    var it = std.mem.tokenizeScalar(u8, payload, ' ');
++                    var i: i32 = 0;
++                    while (it.next()) |mime| : (i += 1) {
++                        if (std.mem.eql(u8, mime, "text/uri-list")) self.kitty_drag_uri_idx = i;
++                        if (std.mem.eql(u8, mime, "text/plain")) self.kitty_drag_text_idx = i;
++                    }
++                },
++                else => {},
++            },
++
++            .present => {
++                if (meta.cell_x < 0 or payload.len == 0) return;
++                const list = if (meta.cell_x == self.kitty_drag_uri_idx)
++                    &self.kitty_drag_uri
++                else if (meta.cell_x == self.kitty_drag_text_idx)
++                    &self.kitty_drag_text
++                else
++                    return;
++                const decoder = std.base64.standard_no_pad.Decoder;
++                const size = decoder.calcSizeForSlice(payload) catch return;
++                const dest = try list.addManyAsSlice(self.alloc, size);
++                decoder.decode(dest, payload) catch {
++                    list.shrinkRetainingCapacity(list.items.len - size);
++                };
++            },
++
++            .start_drag => {
++                if (meta.cell_x != -1 or self.kitty_drag_uri.items.len == 0) return;
++                var data: std.ArrayListUnmanaged(u8) = .empty;
++                defer data.deinit(self.alloc);
++                try data.appendSlice(self.alloc, self.kitty_drag_uri.items);
++                try data.append(self.alloc, 0);
++                try data.appendSlice(self.alloc, self.kitty_drag_text.items);
++                self.surfaceMessageWriter(.{
++                    .kitty_drag_start = try apprt.surface.Message.WriteReq.init(self.alloc, data.items),
++                });
++                const reply: []const u8 = "\x1b]72;t=E;OK\x1b\\";
++                self.messageWriter(try termio.Message.writeReq(self.alloc, reply));
++            },
++
++            .drag_error => {
++                self.kitty_drag_uri.clearRetainingCapacity();
++                self.kitty_drag_text.clearRetainingCapacity();
++            },
++
++            else => {},
++        }
++    }
++
+     inline fn surfaceMessageWriter(
+         self: *StreamHandler,
+         msg: apprt.surface.Message,
+@@ -379,11 +448,11 @@ pub const StreamHandler = struct {
+             .apc_put => self.apc.feed(self.alloc, value),
+             .apc_put_slice => self.apc.feedSlice(self.alloc, value.bytes),
+             .kitty_clipboard => try self.kittyClipboard(value),
++            .kitty_dnd => try self.kittyDnd(value),
+ 
+             // Unimplemented
+             .title_push,
+             .title_pop,
+-            .kitty_dnd,
+             .osc_unknown,
+             .program_status,
+             => {},

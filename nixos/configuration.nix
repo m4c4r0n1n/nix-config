@@ -172,6 +172,7 @@
   environment.systemPackages = with pkgs; [
     (callPackage ./mousiki.nix { })
     (callPackage ./file-tui.nix { })
+    qimgv
     linux-wallpaperengine
     vesktop
     koreader

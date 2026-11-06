@@ -37,7 +37,7 @@
 	 environment.systemPackages = [
 	   zen-browser.packages."x86_64-linux".twilight
 	   nixpkgs-unstable.legacyPackages."x86_64-linux".netwatch
-	   nixpkgs-unstable.legacyPackages."x86_64-linux".ghostty
+	   (nixpkgs-unstable.legacyPackages."x86_64-linux".ghostty.overrideAttrs (o: { patches = (o.patches or [ ]) ++ [ ./ghostty-drag-out.patch ]; }))
 	 ];
 	 nix.settings.extra-substituters = [
 	   "https://umbriel.cachix.org"

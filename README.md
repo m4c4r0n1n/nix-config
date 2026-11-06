@@ -2,7 +2,9 @@
 
 ## My NixOS with Umbriel WM.
 
-<img width="960" height="800" alt="nix-fetch" src="https://github.com/user-attachments/assets/1034dfb7-6ab0-49d3-8b7b-97be0b02327f" />
+<p align="center">
+  <img width="640" alt="nix-fetch" src="https://github.com/user-attachments/assets/1034dfb7-6ab0-49d3-8b7b-97be0b02327f" />
+</p>
 
 ### Music
 
@@ -17,8 +19,8 @@
 
 <table>
   <tr>
-    <td width="50%"><img src="https://github.com/user-attachments/assets/d6882909-028f-4850-a62c-92632629c2ef" width="100%" alt="Wallpaper browser on the Wallhaven tab" /></td>
-    <td width="50%"><img src="https://github.com/user-attachments/assets/f7d46f26-1eea-4ca4-8b02-3738065a6326" width="100%" alt="Wallpaper browser on the Steam Workshop tab" /></td>
+    <td width="50%"><img src="images/wallpapers-wallhaven.png" width="100%" alt="Wallpaper browser on the Wallhaven tab" /></td>
+    <td width="50%"><img src="images/wallpapers-steam.png" width="100%" alt="Wallpaper browser on the Steam Workshop tab" /></td>
   </tr>
 </table>
 
@@ -26,8 +28,8 @@
 
 <table>
   <tr>
-    <td width="50%"><img src="https://github.com/user-attachments/assets/2a561d99-ade1-4b08-82ba-7a8ef15937b9" width="100%" alt="Vesktop" /></td>
-    <td width="50%"><img src="https://github.com/user-attachments/assets/123a03b5-9b02-4570-8222-c96a606f8ec0" width="100%" alt="App launcher" /></td>
+    <td width="50%"><img src="images/apps-vesktop.png" width="100%" alt="Vesktop" /></td>
+    <td width="50%"><img src="images/apps-launcher.png" width="100%" alt="App launcher" /></td>
   </tr>
 </table>
 
