@@ -4,8 +4,6 @@
 
 <img width="960" height="800" alt="nix-fetch" src="https://github.com/user-attachments/assets/1034dfb7-6ab0-49d3-8b7b-97be0b02327f" />
 
-<img width="3440" height="1440" alt="image" src="https://github.com/user-attachments/assets/91a7967e-a416-4f5a-b07a-d2839f6bfb67" />
-
 ### Music
 
 <table>
