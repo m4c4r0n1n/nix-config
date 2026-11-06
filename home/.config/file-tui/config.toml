@@ -7,6 +7,11 @@ path = "/home/chrome"
 icon = "user-home"
 
 [[places]]
+name = "Projects"
+path = "/home/chrome/Projects"
+icon = "folder-development"
+
+[[places]]
 name = "Documents"
 path = "/home/chrome/Documents"
 icon = "folder-documents"

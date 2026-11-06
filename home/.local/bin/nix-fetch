@@ -10,7 +10,7 @@ HOME = os.path.expanduser("~")
 FRAMES = HOME + "/.config/fastfetch/nix-spin.bin"
 PALETTE = HOME + "/.config/ghostty/themes/noctalia-extra"
 LOGO_COLUMNS = 46
-FPS = 24
+FPS = 60
 RAMP = " .:-=+*#%@"
 
 
