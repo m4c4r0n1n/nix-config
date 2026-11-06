@@ -11,6 +11,7 @@ FRAMES = HOME + "/.config/fastfetch/nix-spin.bin"
 PALETTE = HOME + "/.config/ghostty/themes/noctalia-extra"
 LOGO_COLUMNS = 46
 FPS = 60
+STEP = 0.8
 RAMP = " .:-=+*#%@"
 
 
@@ -112,8 +113,8 @@ def spin(flake, top, shell, pidfile):
         try:
             os.kill(shell, 0)
             if not state["paused"]:
-                os.write(1, frame(index))
-                index = (index + 1) % flake.count
+                os.write(1, frame(int(index)))
+                index = (index + STEP) % flake.count
             if os.path.getmtime(PALETTE) != stamp:
                 stamp = os.path.getmtime(PALETTE)
                 flake.colors()
