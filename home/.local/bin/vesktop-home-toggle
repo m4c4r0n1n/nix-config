@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+set -euo pipefail
+file="$HOME/.config/vesktop/sessionData/vencordFiles/vencordDesktopRenderer.js"
+[ -f "$file" ] || exit 0
+grep -q 'nana-home-toggle-6' "$file" && exit 0
+sed -i '/^;(() => {$/,$d' "$file"
+cat >> "$file" <<'JS'
+;(() => {
+  const marker = "nana-home-toggle-6";
+  if (window[marker]) return;
+  window[marker] = true;
+  const key = "nana-home-toggle";
+  const start = async () => {
+    const common = window.Vencord.Webpack.Common;
+    const store = window.Vencord.Api.DataStore;
+    const saved = (await store.get(key)) || {};
+    let lastServer = saved.server || null;
+    let lastDirect = /\/channels\/@me\/\d+/.test(saved.direct || "") ? saved.direct : null;
+    let flipTimer = null;
+    const inDirect = path => path.startsWith("/channels/@me");
+    const note = () => {
+      const path = location.pathname;
+      const root = document.documentElement;
+      const state = inDirect(path) ? "direct" : "server";
+      if (root.dataset.nanaHome && root.dataset.nanaHome !== state) {
+        root.dataset.nanaFlip = state === "direct" ? "on" : "off";
+        clearTimeout(flipTimer);
+        flipTimer = setTimeout(() => delete root.dataset.nanaFlip, 800);
+      }
+      root.dataset.nanaHome = state;
+      const before = lastServer + lastDirect;
+      const chat = path.match(/^\/channels\/@me\/\d+/);
+      const channel = path.match(/^\/channels\/\d+\/\d+/);
+      const guild = path.match(/^\/channels\/\d+/);
+      if (chat) lastDirect = chat[0];
+      else if (channel) lastServer = channel[0];
+      else if (guild && !lastServer?.startsWith(guild[0])) lastServer = guild[0];
+      if (before !== lastServer + lastDirect) store.set(key, { server: lastServer, direct: lastDirect });
+    };
+    for (const name of ["pushState", "replaceState"]) {
+      const original = history[name];
+      history[name] = function (...args) {
+        const result = original.apply(this, args);
+        note();
+        return result;
+      };
+    }
+    window.addEventListener("popstate", note);
+    window.addEventListener("click", event => {
+      if (!event.target.closest?.("[data-list-item-id='guildsnav___home']")) return;
+      note();
+      const direct = inDirect(location.pathname);
+      const target = direct ? lastServer : lastDirect;
+      const guild = direct ? common.SelectedGuildStore.getLastSelectedGuildId() : null;
+      if (!target && !guild) return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      if (target) common.NavigationRouter.transitionTo(target);
+      else common.NavigationRouter.transitionToGuild(guild);
+    }, true);
+    note();
+  };
+  const begin = () => window.Vencord?.Webpack?.onceReady?.then(start);
+  if (window.Vencord?.Webpack?.onceReady) begin();
+  else setTimeout(begin, 1000);
+})();
+JS

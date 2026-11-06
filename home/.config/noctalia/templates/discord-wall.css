@@ -1,6 +1,5 @@
 /**
  * @name Discord-Wall
- * Rendered by Noctalia: edit ~/.config/noctalia/templates/discord-wall.css instead.
  */
 
 :root {
@@ -23,22 +22,17 @@
 }
 
 
-/* Put the wallpaper behind everything. The element is fixed to the viewport,
-   so the image does not need a fixed attachment. A fixed attachment forces a
-   full repaint every animation frame and makes a live GIF stutter. */
 body:has(#app-mount)::before {
   content: "";
   position: fixed;
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  /* promote to its own GPU layer so the GIF animates off the main paint path */
   will-change: transform;
   transform: translateZ(0);
   background: url("http://127.0.0.1:1928/current?v=0") center/cover no-repeat;
 }
 
-/* Remove the app backgrounds. The wallpaper shows through. */
 #app-mount,
 #app-mount .app_a3002d,
 #app-mount .app__160d8,
@@ -55,14 +49,12 @@ body:has(#app-mount)::before {
   background: transparent !important;
 }
 
-/* Add a light tint on the panels. Text stays readable on any wallpaper. */
 #app-mount .wrapper_ef3116,
 #app-mount .sidebarList__5e434,
 #app-mount .membersWrap_c8ffbb {
   background-color: color-mix(in srgb, {{colors.surface.default.hex}} 30%, transparent) !important;
 }
 
-/* Tint the message bubble only. Do not move the row or the avatar. */
 #app-mount .message__5126c {
   background-color: color-mix(in srgb, {{colors.surface.default.hex}} 55%, transparent) !important;
   contain: unset;
@@ -76,4 +68,171 @@ body:has(#app-mount)::before {
 
 * {
   font-family: "Maple Mono NF" !important;
+}
+
+html {
+  font-size: 14px !important;
+}
+
+.sidebar__5e434 {
+  margin: 0 12px 12px 12px;
+}
+
+.guilds__5e434 {
+  margin-right: 12px;
+  margin-bottom: calc(var(--custom-app-panels-height, 0px) + 12px);
+}
+
+.sidebarList__5e434 {
+  margin-bottom: calc(var(--custom-app-panels-height, 0px) + 12px);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.page__5e434,
+.container__133bf {
+  padding-right: 12px;
+  padding-bottom: 12px;
+  border: none !important;
+  background: none;
+}
+
+.page__5e434 > .chat_f75fb0,
+.page__5e434 > .container__133bf {
+  padding: 0;
+}
+
+#app-mount .container__9293f {
+  margin-bottom: 12px;
+  border-bottom: none;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.container_c8ffbb,
+.content_f75fb0 > .membersWrap_c8ffbb {
+  margin-left: 12px;
+  height: auto;
+  min-width: fit-content;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.chat_f75fb0,
+.chatContent_f75fb0 {
+  border: none !important;
+  border-radius: 0;
+  background: none;
+}
+
+.channelTextArea_f75fb0 {
+  border-radius: var(--radius-md, 8px);
+}
+
+.wrapper__6e9f8[data-list-item-id='guildsnav___home'] > .childWrapper__6e9f8 {
+  position: relative;
+  overflow: visible;
+  background: color-mix(in srgb, {{colors.primary.default.hex}} 12%, transparent) !important;
+  transition: background-color 0.4s ease, box-shadow 0.4s ease;
+}
+
+.wrapper__6e9f8[data-list-item-id='guildsnav___home'] > .childWrapper__6e9f8 > svg {
+  display: none;
+}
+
+.wrapper__6e9f8[data-list-item-id='guildsnav___home'] > .childWrapper__6e9f8::before {
+  content: '';
+  position: absolute;
+  inset: 16%;
+  background: color-mix(in srgb, {{colors.primary.default.hex}} 72%, transparent);
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9z'/%3E%3C/svg%3E") center / contain no-repeat;
+  transform: perspective(120px) rotateY(0deg);
+  transition: background-color 0.4s ease;
+}
+
+.wrapper__6e9f8[data-list-item-id='guildsnav___home'] > .childWrapper__6e9f8::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 2px solid {{colors.primary.default.hex}};
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.wrapper__6e9f8[data-list-item-id='guildsnav___home']:hover > .childWrapper__6e9f8::before {
+  background: {{colors.primary.default.hex}};
+}
+
+html[data-nana-home='direct'] .wrapper__6e9f8[data-list-item-id='guildsnav___home'] > .childWrapper__6e9f8 {
+  background: color-mix(in srgb, {{colors.primary.default.hex}} 26%, transparent) !important;
+  box-shadow: 0 0 16px color-mix(in srgb, {{colors.primary.default.hex}} 45%, transparent);
+}
+
+html[data-nana-home='direct'] .wrapper__6e9f8[data-list-item-id='guildsnav___home'] > .childWrapper__6e9f8::before {
+  background: {{colors.primary.default.hex}};
+  transform: perspective(120px) rotateY(180deg);
+}
+
+
+@keyframes nana-flip-on {
+  0% { transform: perspective(120px) rotateY(0deg) scale(1); }
+  50% { transform: perspective(120px) rotateY(90deg) scale(0.72); }
+  82% { transform: perspective(120px) rotateY(200deg) scale(1.14); }
+  100% { transform: perspective(120px) rotateY(180deg) scale(1); }
+}
+
+@keyframes nana-flip-off {
+  0% { transform: perspective(120px) rotateY(180deg) scale(1); }
+  50% { transform: perspective(120px) rotateY(90deg) scale(0.72); }
+  82% { transform: perspective(120px) rotateY(-20deg) scale(1.14); }
+  100% { transform: perspective(120px) rotateY(0deg) scale(1); }
+}
+
+@keyframes nana-ring {
+  0%, 35% { transform: scale(0.5); opacity: 0; }
+  50% { opacity: 0.9; }
+  100% { transform: scale(1.45); opacity: 0; }
+}
+
+.guilds__5e434,
+.sidebarList__5e434 {
+  margin-top: 4px;
+}
+
+.guilds__5e434,
+.wrapper_ef3116 {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.scroller_ef3116 {
+  padding-top: 12px !important;
+  padding-bottom: 12px;
+}
+
+.folderGroup__48112,
+.listItem__650eb {
+  width: calc(var(--guildbar-avatar-size) + 24px);
+}
+
+.guilds__5e434 + div:not(.sidebarList__5e434) {
+  width: 100% !important;
+}
+
+html[data-nana-flip='on'] .wrapper__6e9f8[data-list-item-id='guildsnav___home'] > .childWrapper__6e9f8::before {
+  animation: nana-flip-on 0.7s ease-in-out;
+}
+
+html[data-nana-flip='off'] .wrapper__6e9f8[data-list-item-id='guildsnav___home'] > .childWrapper__6e9f8::before {
+  animation: nana-flip-off 0.7s ease-in-out;
+}
+
+html[data-nana-flip='on'] .wrapper__6e9f8[data-list-item-id='guildsnav___home'] > .childWrapper__6e9f8::after {
+  animation: nana-ring 0.75s ease-out;
+}
+
+.wrapper_ef3116 {
+  mask-image: none !important;
+  -webkit-mask-image: none !important;
 }

@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+if pgrep -f 'quickshell/power' >/dev/null; then
+  pkill -f 'quickshell/power'
+  exit 0
+fi
+exec qs -p "$HOME/.config/quickshell/power"

@@ -218,6 +218,7 @@
   programs.nix-ld.enable = true;
   services.upower.enable = true;
   services.power-profiles-daemon.enable = true;
+  systemd.services.power-profiles-daemon.wantedBy = [ "multi-user.target" ];
   services.gnome.gnome-keyring.enable = true;
 
   programs.steam.enable = true;

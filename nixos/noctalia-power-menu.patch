@@ -1,0 +1,25 @@
+diff -ru a/src/shell/panel/panel_manager.cpp b/src/shell/panel/panel_manager.cpp
+--- a/src/shell/panel/panel_manager.cpp
++++ b/src/shell/panel/panel_manager.cpp
+@@ -2,6 +2,7 @@
+ 
+ #include "compositors/compositor_platform.h"
+ #include "config/config_service.h"
++#include "core/process/process.h"
+ #include "core/deferred_call.h"
+ #include "core/input/key_chord.h"
+ #include "core/input/keybind_matcher.h"
+@@ -564,6 +565,13 @@
+ }
+ 
+ void PanelManager::openPanel(const std::string& panelId, PanelOpenRequest request) {
++  if (panelId == "session") {
++    if (isOpen()) {
++      closePanel();
++    }
++    (void) process::runAsync("\"$HOME/.local/bin/power-menu\"");
++    return;
++  }
+   if (m_inTransition || m_afterCaptureClose) {
+     return;
+   }

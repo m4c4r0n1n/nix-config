@@ -24,7 +24,7 @@ files = ["noctalia.toml"]
 # https://docs.noctalia.dev/umbriel/configuration/#general
 #
 [general]
- autostart = ["noctalia", "/home/chrome/.local/bin/wall-server", "/home/chrome/.local/bin/wpe-restore"]
+ autostart = ["noctalia", "/home/chrome/.local/bin/wall-server", "/home/chrome/.local/bin/wpe-restore", "/home/chrome/.local/bin/vesktop-home-toggle"]
 show_cheatsheet = false
 # xwayland = false
 # Sharp X11 apps and games on scaled outputs; they see physical resolutions.
@@ -199,6 +199,7 @@ numlock_toggle = true
 "Mod+C" = { action = "spawn noctalia msg panel-toggle control-center home", repeat = false }
 "Ctrl+Shift+E" = { action = "spawn ghostty -e file-tui", repeat = false }
 "Mod+Slash" = { action = "cheatsheet-toggle", repeat = false }
+"Mod+Shift+P" = { action = "spawn /home/chrome/.local/bin/power-menu", repeat = false }
 "Mod+Shift+W" = { action = "spawn noctalia msg panel-toggle wallpaper", repeat = false }
 "Mod+Alt+W" = { action = "spawn noctalia msg panel-toggle noctalia/mpvpaper:picker", repeat = false }
 "Mod+Ctrl+W" = { action = "spawn noctalia msg panel-toggle noctalia/wallhaven:browser", repeat = false }
@@ -446,6 +447,11 @@ default_pinned = true
 # ==============================================================================
 # Layer rules
 # https://docs.noctalia.dev/umbriel/layer-rules/
+[[layer_rule]]
+match.namespace = "^nana-power$"
+blur = true
+blur_optimized = false
+
 [[layer_rule]]
 match.namespace = "^noctalia-(bar-[^\"]+|notification|dock|panel|attached-panel|osd|desktop-widget-[^\"]*)$"
 blur = true
