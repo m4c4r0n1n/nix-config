@@ -443,7 +443,7 @@ applyWallpaper = function(id)
   end
   local imageUrl = wallpaper.path
   if type(imageUrl) ~= "string" or imageUrl == "" then
-    noctalia.notifyError(tr("title"), tr("download_failed"))
+    noctalia.notifyError("Wallpapers", tr("download_failed"))
     return
   end
 
@@ -455,7 +455,7 @@ applyWallpaper = function(id)
   noctalia.runAsync(`mkdir -p {shellQuote(destDir)}`, function(mkdirRes)
     if mkdirRes == nil or mkdirRes.exitCode ~= 0 then
       applying = false
-      noctalia.notifyError(tr("title"), tr("download_failed"))
+      noctalia.notifyError("Wallpapers", tr("download_failed"))
       render()
       return
     end
@@ -463,14 +463,14 @@ applyWallpaper = function(id)
     noctalia.download(imageUrl, dest, function(downloadOk)
       if not downloadOk then
         applying = false
-        noctalia.notifyError(tr("title"), tr("download_failed"))
+        noctalia.notifyError("Wallpapers", tr("download_failed"))
         render()
         return
       end
 
       noctalia.setWallpaper(dest)
       applying = false
-      noctalia.notify(tr("title"), tr("applied"))
+      noctalia.notify("Wallpapers", tr("applied"))
       render()
     end)
   end)
@@ -818,7 +818,7 @@ render = function()
   local pageLabel = if applying then tr("applying") else `Page {page}`
 
   local headerContent = {
-    ui.label({ text = tr("title"), fontSize = 16, fontWeight = "bold", color = "on_surface", flexGrow = 1 }),
+    ui.label({ text = "Wallpapers", fontSize = 16, fontWeight = "bold", color = "on_surface", flexGrow = 1 }),
   }
   if closeButton then
     table.insert(headerContent, ui.button({ glyph = "close", onClick = "onCloseClicked" }))
