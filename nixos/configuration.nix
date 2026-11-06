@@ -159,6 +159,7 @@
     };
   };
 
+  security.sudo.extraConfig = "Defaults insults";
   security.rtkit.enable = true;
 
   services.pipewire = {
@@ -170,8 +171,8 @@
 
   environment.systemPackages = with pkgs; [
     (callPackage ./mousiki.nix { })
+    (callPackage ./file-tui.nix { })
     linux-wallpaperengine
-    ghostty
     vesktop
     koreader
     calibre
@@ -184,7 +185,6 @@
     spotify
     tmux
     btop
-    yazi
     gh
     fzf
     neovim

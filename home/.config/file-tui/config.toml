@@ -1,0 +1,46 @@
+icon_size_idx = 9
+sidebar_w = 20
+
+[[places]]
+name = "Home"
+path = "/home/chrome"
+icon = "user-home"
+
+[[places]]
+name = "Desktop"
+path = "/home/chrome/Desktop"
+icon = "user-desktop"
+
+[[places]]
+name = "Documents"
+path = "/home/chrome/Documents"
+icon = "folder-documents"
+
+[[places]]
+name = "Downloads"
+path = "/home/chrome/Downloads"
+icon = "folder-download"
+
+[[places]]
+name = "Music"
+path = "/home/chrome/Music"
+icon = "folder-music"
+
+[[places]]
+name = "Pictures"
+path = "/home/chrome/Pictures"
+icon = "folder-pictures"
+
+[[places]]
+name = "Videos"
+path = "/home/chrome/Videos"
+icon = "folder-videos"
+
+[[places]]
+name = "Trash"
+path = "/home/chrome/.local/share/Trash/files"
+icon = "/home/chrome/.local/share/icons/custom/trash-pink.svg"
+
+[keys]
+quit = ["Ctrl+C"]
+copy = ["Alt+C"]
