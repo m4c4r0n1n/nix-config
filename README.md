@@ -2,7 +2,7 @@
 
 ## My NixOS with Umbriel WM.
 
-<img src="https://github.com/user-attachments/assets/7a320634-8025-417b-a29b-8bb51595bb54" width="100%" alt="Umbriel desktop with Ghostty and fastfetch" />
+<img width="3440" height="1440" alt="image" src="https://github.com/user-attachments/assets/91a7967e-a416-4f5a-b07a-d2839f6bfb67" />
 
 ### Music
 
