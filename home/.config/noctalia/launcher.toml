@@ -9,3 +9,7 @@ category_icons_only = true
 [shell.panel]
 transparency_mode = "soft"
 list_item_background = true
+control_center_placement = "floating"
+control_center_position = "center"
+session_placement = "floating"
+session_position = "center"

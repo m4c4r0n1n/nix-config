@@ -83,7 +83,7 @@ show_cheatsheet = false
 # https://docs.noctalia.dev/umbriel/appearance/
 #
 [appearance.blur]
-enabled = false
+enabled = true
 radius = 3
 
 # Optional title bar with modifier-free dragging and floating frame resizing.
@@ -195,6 +195,10 @@ numlock_toggle = true
 "Print" = { action = "spawn /home/chrome/.local/bin/shot", repeat = false }
 "Mod+Alt+R" = { action = "spawn /home/chrome/.local/bin/shot-record stop", repeat = false }
 "Mod+V" = { action = "spawn noctalia msg panel-toggle clipboard", repeat = false }
+"Mod+Shift+V" = { action = "spawn noctalia msg panel-toggle launcher /emo", repeat = false }
+"Mod+C" = { action = "spawn noctalia msg panel-toggle control-center home", repeat = false }
+"Ctrl+Shift+E" = { action = "spawn ghostty -e file-tui", repeat = false }
+"Mod+Slash" = { action = "cheatsheet-toggle", repeat = false }
 "Mod+Shift+W" = { action = "spawn noctalia msg panel-toggle wallpaper", repeat = false }
 "Mod+Alt+W" = { action = "spawn noctalia msg panel-toggle noctalia/mpvpaper:picker", repeat = false }
 "Mod+Ctrl+W" = { action = "spawn noctalia msg panel-toggle noctalia/wallhaven:browser", repeat = false }

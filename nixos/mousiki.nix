@@ -1,6 +1,6 @@
 # Mousiki Plus, built from its release source.
 { lib, stdenv, fetchFromGitHub, cmake, pkg-config, makeWrapper, alsa-lib
-, libpulseaudio, SDL2, ffmpeg, yt-dlp, python3, curl, wl-clipboard }:
+, libpulseaudio, SDL2, ffmpeg, yt-dlp, python3, curl, wl-clipboard, dbus }:
 
 stdenv.mkDerivation rec {
   pname = "mousiki-plus";
@@ -31,7 +31,7 @@ stdenv.mkDerivation rec {
     cp $src/stations.txt $src/radio_config.txt $out/lib/mousiki/
     makeWrapper $out/lib/mousiki/mousiki $out/bin/mousiki \
       --prefix PATH : ${lib.makeBinPath [ ffmpeg yt-dlp python3 curl wl-clipboard ]} \
-      --prefix LD_LIBRARY_PATH : ${lib.makeLibraryPath [ alsa-lib libpulseaudio SDL2 ]}
+      --prefix LD_LIBRARY_PATH : ${lib.makeLibraryPath [ alsa-lib libpulseaudio SDL2 dbus ]}
     runHook postInstall
   '';
 }

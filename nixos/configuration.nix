@@ -217,6 +217,7 @@
   programs.starship.enable = true;
   programs.nix-ld.enable = true;
   services.upower.enable = true;
+  services.power-profiles-daemon.enable = true;
   services.gnome.gnome-keyring.enable = true;
 
   programs.steam.enable = true;
