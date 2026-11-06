@@ -14,6 +14,7 @@
 
 <img width="926" height="717" alt="image" src="https://github.com/user-attachments/assets/f7d46f26-1eea-4ca4-8b02-3738065a6326" />
 
-<img width="913" height="622" alt="image" src="https://github.com/user-attachments/assets/74ba3b07-a4de-4145-8b02-b7321ae4e1da" />
+<img width="906" height="620" alt="image" src="https://github.com/user-attachments/assets/123a03b5-9b02-4570-8222-c96a606f8ec0" />
+
 
 Hardware-specific pieces: (RTX 4090, 3440x1440 at 240 Hz, disk UUIDs) need changing for another machine.
