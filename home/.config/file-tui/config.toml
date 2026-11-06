@@ -7,11 +7,6 @@ path = "/home/chrome"
 icon = "user-home"
 
 [[places]]
-name = "Desktop"
-path = "/home/chrome/Desktop"
-icon = "user-desktop"
-
-[[places]]
 name = "Documents"
 path = "/home/chrome/Documents"
 icon = "folder-documents"
@@ -39,7 +34,7 @@ icon = "folder-videos"
 [[places]]
 name = "Trash"
 path = "/home/chrome/.local/share/Trash/files"
-icon = "/home/chrome/.local/share/icons/custom/trash-can.svg"
+icon = "/home/chrome/.local/share/icons/custom/recycle-basket.svg"
 
 [keys]
 quit = ["Ctrl+C"]
