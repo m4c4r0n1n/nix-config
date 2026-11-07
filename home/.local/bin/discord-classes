@@ -1,14 +1,23 @@
-#!/usr/bin/env -S nix shell --quiet --impure --expr "with import <nixpkgs> {}; python3.withPackages (p: [p.brotli])" -c python3 -I
+#!/usr/bin/env -S python3 -I
 import collections
 import glob
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import time
 
-import brotli
+try:
+    import brotli
+except ImportError:
+    if shutil.which("nix") and "DISCORD_CLASSES_NIX" not in os.environ:
+        os.environ["DISCORD_CLASSES_NIX"] = "1"
+        shell = "with import <nixpkgs> {}; python3.withPackages (p: [p.brotli])"
+        command = ["nix", "shell", "--quiet", "--impure", "--expr", shell, "-c", "python3", "-I", __file__]
+        os.execvp("nix", command + sys.argv[1:])
+    sys.exit("discord-classes needs the Python brotli package. Install python-brotli or run: pip install brotli")
 
 HOME = os.path.expanduser("~")
 CACHE = os.environ.get("DISCORD_CACHE", HOME + "/.config/vesktop/sessionData/Cache/Cache_Data")
