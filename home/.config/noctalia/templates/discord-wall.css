@@ -392,9 +392,7 @@ html[data-nana-flip='on'] .wrapper_JJ-hgR[data-list-item-id='guildsnav___home'] 
 }
 
 #app-mount [class*="chatContent_"] > [class*="messagesWrapper_"] {
-  clip-path: inset(0 round 10px) !important;
-  mask-image: linear-gradient(to bottom, #000 calc(100% - 18px), transparent calc(100% - 16px)) !important;
-  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 18px), transparent calc(100% - 16px)) !important;
+  clip-path: inset(0 0 28px 0 round 10px) !important;
 }
 
 #app-mount li[id^="chat-messages"] > [class*="message_"] {
@@ -413,6 +411,8 @@ html[data-nana-flip='on'] .wrapper_JJ-hgR[data-list-item-id='guildsnav___home'] 
 
 #app-mount [class*="form_"],
 #app-mount [class*="channelBottomBarArea_"] {
+  padding-bottom: 0 !important;
+  margin-bottom: 0 !important;
   padding-left: 0 !important;
   padding-right: 0 !important;
   margin-left: 0 !important;
@@ -420,6 +420,7 @@ html[data-nana-flip='on'] .wrapper_JJ-hgR[data-list-item-id='guildsnav___home'] 
 }
 
 #app-mount [class*="channelTextArea_"] {
+  margin-bottom: 0 !important;
   margin-left: 0 !important;
   margin-right: 0 !important;
 }
@@ -429,6 +430,8 @@ html[data-nana-flip='on'] .wrapper_JJ-hgR[data-list-item-id='guildsnav___home'] 
 }
 
 #app-mount [class*="panels_"] {
+  bottom: 0 !important;
+  height: 58px !important;
   left: 0 !important;
   width: 276px !important;
 }
