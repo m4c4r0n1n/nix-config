@@ -29,6 +29,8 @@ local closeButton = true
 
 local videos = {}      -- { { path=, name=, ext= }, ... }
 local cursorIndex = 0
+local allVideos = {}
+local filterText = ""
 local page = 1
 local outputsList = {}
 local selectedConnectorName = "" -- empty = all outputs
@@ -217,6 +219,8 @@ end
 
 local function loadVideos()
   videos = {}
+  allVideos = {}
+  filterText = ""
   cursorIndex = 0
   errorMessage = ""
   local dir = videoDirectory()
@@ -229,6 +233,7 @@ local function loadVideos()
     local ext = extensionOf(name)
     if VIDEO_EXTENSIONS[ext] then
       table.insert(videos, { path = dir .. "/" .. name, name = name, ext = ext })
+      table.insert(allVideos, videos[#videos])
     end
   end
   table.sort(videos, function(a, b) return a.name < b.name end)
@@ -473,6 +478,14 @@ render = function()
     }),
   }
 
+  table.insert(mainChildren, ui.input({
+    key = "search",
+    placeholder = "Search wallpapers",
+    value = filterText,
+    focus = true,
+    onChange = "onFilterChange",
+  }))
+
   table.insert(mainChildren, ui.scroll({ flexGrow = 1, gap = 12, revealKey = revealRow() }, {
     videoGrid(),
   }))
@@ -504,13 +517,28 @@ function onOpen(_context)
   render()
 end
 
+function onFilterChange(value)
+  filterText = value
+  local needle = string.lower(value)
+  videos = {}
+  for _, video in ipairs(allVideos) do
+    if needle == "" or string.find(string.lower(video.name), needle, 1, true) ~= nil then
+      table.insert(videos, video)
+    end
+  end
+  page = 1
+  cursorIndex = 0
+  render()
+end
+
 function onKey(chord, pressed)
   if not pressed or #videos == 0 then
     return
   end
   if chord == "return" then
-    if videos[cursorIndex] ~= nil then
-      applyVideo(videos[cursorIndex].path)
+    local video = videos[cursorIndex] or videos[1]
+    if video ~= nil then
+      applyVideo(video.path)
     end
     return
   end

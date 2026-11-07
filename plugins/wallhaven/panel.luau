@@ -45,6 +45,8 @@ local aspectRatioIndex = 0
 local clearCounter = 0
 local pageInputCounter = 0
 local pageEditing = false
+local openCount = 0
+local keptPlace = nil
 
 local thumbPaths = {} -- id -> cache file path
 local thumbPending = {} -- id -> true while downloading
@@ -410,7 +412,21 @@ local function queueThumbDownload(wallpaper)
 end
 
 local function pickWallpaper(id)
+  for index, wallpaper in wallpapers do
+    if wallpaper.id == id then
+      cursorIndex = index
+    end
+  end
+  keptPlace = { index = cursorIndex, page = page, query = query, site = siteIndex }
   applyWallpaper(id)
+end
+
+local function restoreCursor()
+  local kept = keptPlace
+  if kept ~= nil and kept.page == page and kept.query == query and kept.site == siteIndex then
+    return math.min(kept.index, #wallpapers)
+  end
+  return 0
 end
 
 local function plainName(text)
@@ -470,15 +486,27 @@ applyWallpaper = function(id)
   render()
 
   local destDir = downloadDir()
-  local dest = `{destDir}/wallhaven-{id}{fileExtension(wallpaper)}`
-  noctalia.runAsync(`mkdir -p {shellQuote(destDir)}`, function(mkdirRes)
-    if mkdirRes == nil or mkdirRes.exitCode ~= 0 then
+  local slug = string.gsub(string.lower(noctalia.string.trim(query)), "[^%w]+", "-")
+  local prefix = if slug ~= "" then `{slug}_` else ""
+  local dest = `{destDir}/{prefix}wallhaven-{id}{fileExtension(wallpaper)}`
+  local function finish(path)
+    noctalia.setWallpaper(path)
+    applying = false
+    noctalia.notify("Wallpapers", tr("applied"))
+    render()
+  end
+  noctalia.runAsync(`mkdir -p {shellQuote(destDir)} && ls -1 {shellQuote(destDir)} | grep -F 'wallhaven-{id}.' | head -1`, function(listRes)
+    if listRes == nil or listRes.exitCode ~= 0 then
       applying = false
       noctalia.notifyError("Wallpapers", tr("download_failed"))
       render()
       return
     end
-
+    local existing = noctalia.string.trim(listRes.stdout or "")
+    if existing ~= "" then
+      finish(`{destDir}/{existing}`)
+      return
+    end
     noctalia.download(imageUrl, dest, function(downloadOk)
       if not downloadOk then
         applying = false
@@ -486,11 +514,7 @@ applyWallpaper = function(id)
         render()
         return
       end
-
-      noctalia.setWallpaper(dest)
-      applying = false
-      noctalia.notify("Wallpapers", tr("applied"))
-      render()
+      finish(dest)
     end)
   end)
 end
@@ -582,7 +606,7 @@ local function fetchVideoSite()
     local pages, parsed = parseSiteOutput(result.stdout)
     totalPages = math.max(pages, page)
     wallpapers = parsed
-    cursorIndex = 0
+    cursorIndex = restoreCursor()
     render()
     ensureCacheDir(function()
       thumbQueue = {}
@@ -731,7 +755,7 @@ fetchWallpapers = function()
     end
 
     wallpapers = filteredWallpapers
-    cursorIndex = 0
+    cursorIndex = restoreCursor()
     totalPages = normalizeTotalPages(lastPage)
     if page > totalPages then
       page = totalPages
@@ -863,10 +887,11 @@ render = function()
 
     ui.row({ gap = 8, align = "center" }, {
       ui.input({
-        key = "search",
+        key = `search_{openCount}`,
         placeholder = tr("search_placeholder"),
         value = query,
         flexGrow = 1,
+        focus = true,
         onChange = "onSearchChange",
         onSubmit = "onSearchSubmit",
       }),
@@ -918,6 +943,8 @@ render = function()
 end
 
 function onOpen(_context)
+  pageEditing = false
+  openCount += 1
   closeButton = noctalia.getSetting("shell.show_close_buttons") ~= false
   normalizePurityFilters()
   fetchWallpapers()

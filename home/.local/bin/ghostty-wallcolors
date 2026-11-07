@@ -74,7 +74,16 @@ def spread(found):
     mains = []
     for group in groups:
         first = max(group, key=lambda c: c[0])
-        mains.append((first[1], first[3], max(first[2], 0.58)))
+        share = sum(c[0] for c in group)
+        deep = [
+            c for c in group
+            if c[0] >= share * 0.02 and c[4] > 0.3 and c[2] < 0.45 and (c[1] <= 0.045 or c[1] >= 0.97)
+        ]
+        if deep and group is groups[0]:
+            first = max(deep, key=lambda c: c[4])
+            mains.append((first[1], first[3], max(first[2], 0.45)))
+        else:
+            mains.append((first[1], first[3], max(first[2], 0.58)))
     chosen = list(mains)
     pair = mains[:2]
     step = 0

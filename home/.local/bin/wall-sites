@@ -258,8 +258,12 @@ def steam_fetch(item, title):
 def video_fetch(item, extension, url, title):
     """Downloads a live wallpaper, then sets it. Runs detached from the panel."""
     folder = os.path.expanduser("~/Pictures/Live Wallpapers")
-    dest = "%s/%s%s" % (folder, item, extension)
     os.makedirs(folder, exist_ok=True)
+    name = re.sub(r"[^a-z0-9]+", "-", title.lower()).strip("-")
+    dest = "%s/%s%s%s" % (folder, name + "_" if name else "", item, extension)
+    for file in os.listdir(folder):
+        if file == item + extension or file.endswith("_" + item + extension):
+            dest = folder + "/" + file
     if not (os.path.exists(dest) and os.path.getsize(dest) > 0):
         if extension == ".webm":
             found = re.search(r'<source src="(/wp-content/uploads/preview/[^"]+)"', get(url))

@@ -148,13 +148,14 @@ ShellRoot {
                     root.select(root.current + 1);
                 } else if (key >= Qt.Key_1 && key <= Qt.Key_5) {
                     root.select(key - Qt.Key_1);
+                    root.press();
                 } else if (key === Qt.Key_Return || key === Qt.Key_Enter || key === Qt.Key_Space) {
                     root.press();
                 }
                 event.accepted = true;
             }
             Keys.onReleased: event => {
-                if (!event.isAutoRepeat && (event.key === Qt.Key_Return || event.key === Qt.Key_Enter || event.key === Qt.Key_Space)) {
+                if (!event.isAutoRepeat && ((event.key >= Qt.Key_1 && event.key <= Qt.Key_5) || event.key === Qt.Key_Return || event.key === Qt.Key_Enter || event.key === Qt.Key_Space)) {
                     root.release();
                 }
             }

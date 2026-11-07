@@ -1,0 +1,43 @@
+diff -ru a/src/theme/custom_schemes.cpp b/src/theme/custom_schemes.cpp
+--- a/src/theme/custom_schemes.cpp	2026-11-07 02:56:28.560971697 -0500
++++ b/src/theme/custom_schemes.cpp	2026-11-07 02:59:08.921967698 -0500
+@@ -552,7 +552,7 @@
+         }
+         const Color base = finalColors.front();
+         const double offset = static_cast<double>(finalColors.size()) * 60.0;
+-        finalColors.push_back(shiftHue(base, offset));
++        finalColors.push_back(scheme == Scheme::Soft ? base : shiftHue(base, offset));
+       }
+ 
+       finalColors.resize(static_cast<size_t>(k));
+@@ -932,28 +932,8 @@
+       const Color primary = palette.empty() ? Color(255, 245, 155) : palette[0];
+       auto [primary_h, primary_s, primary_l] = primary.toHsl();
+       (void)primary_l;
+-
+-      constexpr double MIN_HUE_DISTANCE = 30.0;
+-      Color secondary = shiftHue(primary, 30.0);
+-      if (palette.size() > 1) {
+-        const auto [sh, ss, sl] = palette[1].toHsl();
+-        (void)ss;
+-        (void)sl;
+-        if (hueDistance(primary_h, sh) > MIN_HUE_DISTANCE)
+-          secondary = palette[1];
+-      }
+-      Color tertiary = shiftHue(primary, 60.0);
+-      if (palette.size() > 2) {
+-        const auto [th, ts, tl] = palette[2].toHsl();
+-        const auto [sh, ss, sl] = secondary.toHsl();
+-        (void)ts;
+-        (void)tl;
+-        (void)ss;
+-        (void)sl;
+-        if (hueDistance(primary_h, th) > MIN_HUE_DISTANCE && hueDistance(sh, th) > MIN_HUE_DISTANCE) {
+-          tertiary = palette[2];
+-        }
+-      }
++      const Color secondary = palette.size() > 1 ? palette[1] : primary;
++      const Color tertiary = palette.size() > 2 ? palette[2] : secondary;
+       const Color error = findErrorColor(palette);
+ 
+       auto clamp = [](double v, double lo, double hi) { return std::clamp(v, lo, hi); };
