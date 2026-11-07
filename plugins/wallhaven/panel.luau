@@ -755,9 +755,6 @@ local function tileBorder(wallpaper, current, focused)
   if focused then
     return "on_surface", TILE_BORDER_SELECTED
   end
-  if current then
-    return "primary", TILE_BORDER_SELECTED
-  end
   local purity = wallpaper.purity
   if purity == "nsfw" then
     return "error", TILE_BORDER_RATED
@@ -801,9 +798,6 @@ local function wallpaperTile(wallpaper, index)
   local id = wallpaper.id
   local current = isCurrentWallpaper(id)
   local resolution = wallpaper.resolution or id
-  if current then
-    resolution = "Current  " .. resolution
-  end
   local borderColor, borderWidth = tileBorder(wallpaper, current, index == cursorIndex)
   local frameWidth, frameHeight = tileThumbSize()
   return ui.column({
@@ -947,6 +941,11 @@ function onKey(chord, pressed)
   end
   if cursorIndex == 0 then
     cursorIndex = 1
+    for index, wallpaper in wallpapers do
+      if isCurrentWallpaper(wallpaper.id) then
+        cursorIndex = index
+      end
+    end
   elseif chord == "left" then
     cursorIndex = math.max(1, cursorIndex - 1)
   elseif chord == "right" then

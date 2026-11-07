@@ -230,7 +230,7 @@
   nixpkgs.overlays = [
     (final: prev: {
       thunar-unwrapped = prev.thunar-unwrapped.overrideAttrs (old: {
-        patches = (old.patches or [ ]) ++ [ ./thunar-folder-icons.patch ];
+        patches = (old.patches or [ ]) ++ [ ./thunar-folder-icons.patch ./thunar-places.patch ];
       });
     })
   ];

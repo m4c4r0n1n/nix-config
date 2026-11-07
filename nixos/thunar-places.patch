@@ -1,0 +1,22 @@
+--- a/thunar/thunar-shortcuts-model.c	2026-11-07 01:57:05.029284465 -0500
++++ b/thunar/thunar-shortcuts-model.c	2026-11-07 01:57:05.046140916 -0500
+@@ -1219,6 +1219,9 @@
+   if (model->hidden_bookmarks == NULL)
+     return FALSE;
+ 
++  if (shortcut->group == THUNAR_SHORTCUT_GROUP_PLACES_BOOKMARKS)
++    return FALSE;
++
+   /* get the uri */
+   if (shortcut->file != NULL)
+     uri = thunar_file_dup_uri (shortcut->file);
+@@ -1358,7 +1361,8 @@
+   /* schemes we'd like to have as ThunarFiles in the model */
+   if (g_file_has_uri_scheme (gfile, "file")
+       || g_file_has_uri_scheme (gfile, "computer")
+-      || g_file_has_uri_scheme (gfile, "recent"))
++      || g_file_has_uri_scheme (gfile, "recent")
++      || g_file_has_uri_scheme (gfile, "trash"))
+     return TRUE;
+ 
+   return FALSE;

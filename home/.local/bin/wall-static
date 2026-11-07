@@ -5,6 +5,14 @@
 seen="${XDG_RUNTIME_DIR:-/tmp}/wall-static-last"
 [[ -n ${NOCTALIA_WALLPAPER_PATH:-} && -r $seen && $(<"$seen") == "$NOCTALIA_WALLPAPER_PATH" ]] && exit 0
 printf '%s' "${NOCTALIA_WALLPAPER_PATH:-}" > "$seen"
+if [[ -n ${NOCTALIA_WALLPAPER_PATH:-} ]]; then
+  scheme=soft
+  if noctalia theme "$NOCTALIA_WALLPAPER_PATH" --scheme m3-content --dark 2>/dev/null | grep -m1 '"primary"' | grep -qi '#adc6ff'; then
+    color=$(magick "$NOCTALIA_WALLPAPER_PATH" -resize 200x200 -alpha off -colorspace HCL -channel G -separate +channel -threshold 15% -format '%[fx:int(mean*100)]' info: 2>/dev/null)
+    [[ ${color:-1} == 0 ]] && scheme=m3-monochrome
+  fi
+  [[ $(noctalia msg color-scheme-get 2>/dev/null) == *"$scheme"* ]] || noctalia msg color-scheme-set wallpaper "$scheme" >/dev/null 2>&1
+fi
 "$HOME/.local/bin/ghostty-wallcolors" &
 "$HOME/.local/bin/wall-sites" wpe-stop
 case ${NOCTALIA_WALLPAPER_PATH:-} in

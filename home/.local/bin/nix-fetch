@@ -23,7 +23,7 @@ def palette():
                 found[int(slot)] = tuple(int(value[i:i + 2], 16) for i in (0, 2, 4))
     except OSError:
         pass
-    return found.get(1, (126, 186, 228)), found.get(2, (82, 119, 195))
+    return found.get(1, (126, 186, 228)), found.get(5, (82, 119, 195))
 
 
 def shades(base):

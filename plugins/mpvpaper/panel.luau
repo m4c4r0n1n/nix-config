@@ -28,6 +28,7 @@ local SECONDS_PER_MINUTE = 60
 local closeButton = true
 
 local videos = {}      -- { { path=, name=, ext= }, ... }
+local cursorIndex = 0
 local page = 1
 local outputsList = {}
 local selectedConnectorName = "" -- empty = all outputs
@@ -216,6 +217,7 @@ end
 
 local function loadVideos()
   videos = {}
+  cursorIndex = 0
   errorMessage = ""
   local dir = videoDirectory()
   local entries = noctalia.listDir(dir)
@@ -306,10 +308,12 @@ local function isAssignedToSelection(path)
   return assignmentFor(selectedConnectorName) == path
 end
 
-local function videoTile(video)
+local function videoTile(video, index)
   local frameWidth, frameHeight = tileSize()
   local path = video.path
-  local selected = isAssignedToSelection(path)
+  local focused = index == cursorIndex
+  local borderColor = focused and "on_surface" or "outline_variant"
+  local borderWidth = focused and 3 or 1
   local thumb = thumbPaths[path]
   local onClick = function()
     applyVideo(path)
@@ -323,8 +327,8 @@ local function videoTile(video)
       path = thumb,
       fit = "cover",
       radius = TILE_RADIUS,
-      border = selected and "primary" or "outline_variant",
-      borderWidth = selected and 3 or 1,
+      border = borderColor,
+      borderWidth = borderWidth,
       onClick = onClick,
     })
   else
@@ -333,8 +337,8 @@ local function videoTile(video)
       height = frameHeight,
       fill = "surface_container",
       radius = TILE_RADIUS,
-      border = selected and "primary" or "outline_variant",
-      borderWidth = selected and 3 or 1,
+      border = borderColor,
+      borderWidth = borderWidth,
       onClick = onClick,
     })
   end
@@ -344,7 +348,7 @@ local function videoTile(video)
     ui.label({
       text = video.name,
       fontSize = 11,
-      color = selected and "primary" or "on_surface_variant",
+      color = "on_surface_variant",
       maxLines = 1,
       maxWidth = frameWidth,
       textAlign = "center",
@@ -362,9 +366,10 @@ local function videoGrid()
   local rows = {}
   local row = {}
   for i = first, last do
-    table.insert(row, videoTile(videos[i]))
+    table.insert(row, videoTile(videos[i], i))
     if #row == COLUMNS or i == last then
-      table.insert(rows, ui.row({ gap = COLUMN_GAP, align = "stretch" }, row))
+      local rowNumber = math.ceil((i - first + 1) / COLUMNS)
+      table.insert(rows, ui.row({ key = "row" .. rowNumber, gap = COLUMN_GAP, align = "stretch" }, row))
       row = {}
     end
   end
@@ -387,6 +392,14 @@ local function slideshowToggleButton()
       render()
     end,
   })
+end
+
+local function revealRow()
+  if cursorIndex == 0 then
+    return ""
+  end
+  local offset = cursorIndex - (page - 1) * PAGE_SIZE
+  return "row" .. math.ceil(offset / COLUMNS)
 end
 
 render = function()
@@ -460,7 +473,7 @@ render = function()
     }),
   }
 
-  table.insert(mainChildren, ui.scroll({ flexGrow = 1, gap = 12 }, {
+  table.insert(mainChildren, ui.scroll({ flexGrow = 1, gap = 12, revealKey = revealRow() }, {
     videoGrid(),
   }))
 
@@ -488,6 +501,42 @@ function onOpen(_context)
 
   refreshOutputs()
   loadVideos()
+  render()
+end
+
+function onKey(chord, pressed)
+  if not pressed or #videos == 0 then
+    return
+  end
+  if chord == "return" then
+    if videos[cursorIndex] ~= nil then
+      applyVideo(videos[cursorIndex].path)
+    end
+    return
+  end
+  if cursorIndex == 0 then
+    cursorIndex = (page - 1) * PAGE_SIZE + 1
+    for index, video in ipairs(videos) do
+      if isAssignedToSelection(video.path) then
+        cursorIndex = index
+      end
+    end
+  elseif chord == "left" then
+    cursorIndex = math.max(1, cursorIndex - 1)
+  elseif chord == "right" then
+    cursorIndex = math.min(#videos, cursorIndex + 1)
+  elseif chord == "up" then
+    cursorIndex = math.max(1, cursorIndex - COLUMNS)
+  elseif chord == "down" then
+    cursorIndex = math.min(#videos, cursorIndex + COLUMNS)
+  end
+  local target = math.ceil(cursorIndex / PAGE_SIZE)
+  while page < target do
+    onNextPage()
+  end
+  while page > target do
+    onPrevPage()
+  end
   render()
 end
 

@@ -1,0 +1,46 @@
+diff -ru a/src/shell/wallpaper/panel/wallpaper_tile.cpp b/src/shell/wallpaper/panel/wallpaper_tile.cpp
+--- a/src/shell/wallpaper/panel/wallpaper_tile.cpp	2026-11-07 02:30:00.521660825 -0500
++++ b/src/shell/wallpaper/panel/wallpaper_tile.cpp	2026-11-07 02:30:00.537245063 -0500
+@@ -542,11 +542,7 @@
+ void WallpaperTile::setOnTileLeave(HoverCallback callback) { m_onLeave = std::move(callback); }
+ 
+ void WallpaperTile::setHoveredVisual(bool hovered) {
+-  if (m_hoveredVisual == hovered) {
+-    return;
+-  }
+-  m_hoveredVisual = hovered;
+-  applyVisualState();
++  (void)hovered;
+ }
+ 
+ void WallpaperTile::setStarHovered(bool hovered) {
+@@ -621,23 +617,23 @@
+   if (m_thumbHost == nullptr || m_thumb == nullptr) {
+     return;
+   }
+-  const bool active = m_selected || m_hoveredVisual || m_current;
++  const bool active = m_selected || m_hoveredVisual || false;
+   setOpacity(m_missingFile ? 0.45F : 1.0F);
+-  setZIndex((m_selected || m_current) ? 2 : (m_hoveredVisual ? 1 : 0));
+-  animateThumbScale(activeThumbScale(m_selected, m_current, m_hoveredVisual));
++  setZIndex((m_selected || false) ? 2 : (m_hoveredVisual ? 1 : 0));
++  animateThumbScale(activeThumbScale(m_selected, false, m_hoveredVisual));
+   m_thumb->setTint(active ? rgba(1.0F, 1.0F, 1.0F, 1.0F) : rgba(0.5F, 0.5F, 0.5F, 1.0F));
+ 
+   auto outlineWidth = Style::borderWidth;
+-  if (m_selected || m_current || m_hoveredVisual) {
++  if (m_selected || false || m_hoveredVisual) {
+     outlineWidth = Style::emphasizedBorderWidth;
+   }
+ 
+   ColorSpec borderColor = m_selected ? colorSpecFromRole(ColorRole::Primary)
+-      : m_current                    ? colorSpecFromRole(ColorRole::Secondary)
++      : false                    ? colorSpecFromRole(ColorRole::Secondary)
+       : m_hoveredVisual              ? colorSpecFromRole(ColorRole::Hover)
+                                      : colorSpecFromRole(ColorRole::OutlineVariant);
+   ColorSpec labelColor =
+-      m_current ? colorSpecFromRole(ColorRole::Secondary) : colorSpecFromRole(ColorRole::OnSurfaceVariant);
++      false ? colorSpecFromRole(ColorRole::Secondary) : colorSpecFromRole(ColorRole::OnSurfaceVariant);
+   ColorSpec frameBg = colorSpecFromRole(ColorRole::SurfaceContainer);
+   m_label->setColor(labelColor);
+ 

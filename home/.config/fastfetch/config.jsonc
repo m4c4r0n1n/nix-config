@@ -9,125 +9,125 @@
   "display": {
     "separator": ": ",
     "color": {
-      "title": "cyan"
+      "title": "magenta"
     }
   },
   "modules": [
     {
       "type": "custom",
-      "format": "\u001b[36m┌────────────────────────────Hardware────────────────────────────┐\u001b[0m"
+      "format": "\u001b[35m┌────────────────────────────Hardware────────────────────────────┐\u001b[0m"
     },
     {
       "type": "host",
       "key": " PC",
-      "keyColor": "cyan"
+      "keyColor": "magenta"
     },
     {
       "type": "cpu",
       "key": "│ ├",
-      "keyColor": "cyan"
+      "keyColor": "magenta"
     },
     {
       "type": "gpu",
       "key": "│ ├󰢮",
-      "keyColor": "cyan",
+      "keyColor": "magenta",
       "format": "{2}"
     },
     {
       "type": "memory",
       "key": "│ ├",
-      "keyColor": "cyan"
+      "keyColor": "magenta"
     },
     {
       "type": "disk",
       "key": "│ ├󰋊",
-      "keyColor": "cyan",
+      "keyColor": "magenta",
       "folders": "/"
     },
     {
       "type": "disk",
       "key": "└ └󰋊",
-      "keyColor": "cyan",
+      "keyColor": "magenta",
       "folders": "/home"
     },
     {
       "type": "custom",
-      "format": "\u001b[36m└────────────────────────────────────────────────────────────────┘\u001b[0m"
+      "format": "\u001b[35m└────────────────────────────────────────────────────────────────┘\u001b[0m"
     },
     "break",
     {
       "type": "custom",
-      "format": "\u001b[36m┌────────────────────────────Software────────────────────────────┐\u001b[0m"
+      "format": "\u001b[35m┌────────────────────────────Software────────────────────────────┐\u001b[0m"
     },
     {
       "type": "os",
       "key": " OS",
-      "keyColor": "cyan"
+      "keyColor": "magenta"
     },
     {
       "type": "kernel",
       "key": "│ ├",
-      "keyColor": "cyan"
+      "keyColor": "magenta"
     },
     {
       "type": "bios",
       "key": "│ ├",
-      "keyColor": "cyan"
+      "keyColor": "magenta"
     },
     {
       "type": "packages",
       "key": "│ ├",
-      "keyColor": "cyan"
+      "keyColor": "magenta"
     },
     {
       "type": "command",
       "key": "└ └",
-      "keyColor": "cyan",
+      "keyColor": "magenta",
       "text": "zsh --version | cut -d' ' -f1,2"
     },
     {
       "type": "wm",
       "key": " WM",
-      "keyColor": "blue"
+      "keyColor": "95"
     },
     {
       "type": "lm",
       "key": "│ ├󰍂",
-      "keyColor": "blue"
+      "keyColor": "95"
     },
     {
       "type": "theme",
       "key": "│ ├󰉼",
-      "keyColor": "blue"
+      "keyColor": "95"
     },
     {
       "type": "terminal",
       "key": "└ └󰆍",
-      "keyColor": "blue"
+      "keyColor": "95"
     },
     {
       "type": "custom",
-      "format": "\u001b[36m└────────────────────────────────────────────────────────────────┘\u001b[0m"
+      "format": "\u001b[35m└────────────────────────────────────────────────────────────────┘\u001b[0m"
     },
     "break",
     {
       "type": "custom",
-      "format": "\u001b[36m┌──────────────────────────Uptime / Age──────────────────────────┐\u001b[0m"
+      "format": "\u001b[35m┌──────────────────────────Uptime / Age──────────────────────────┐\u001b[0m"
     },
     {
       "type": "command",
       "key": "       OS Age",
-      "keyColor": "cyan",
+      "keyColor": "magenta",
       "text": "echo $(( ($(date +%s) - $(stat -c %W /)) / 86400 )) days"
     },
     {
       "type": "uptime",
       "key": "       Uptime",
-      "keyColor": "cyan"
+      "keyColor": "magenta"
     },
     {
       "type": "custom",
-      "format": "\u001b[36m└────────────────────────────────────────────────────────────────┘\u001b[0m"
+      "format": "\u001b[35m└────────────────────────────────────────────────────────────────┘\u001b[0m"
     }
   ]
 }

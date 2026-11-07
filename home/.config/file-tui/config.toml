@@ -37,6 +37,16 @@ path = "/home/chrome/Videos"
 icon = "folder-videos"
 
 [[places]]
+name = "Manga"
+path = "/home/chrome/Manga"
+icon = "folder-pictures"
+
+[[places]]
+name = "Codebases"
+path = "/home/chrome/Codebases"
+icon = "folder-development"
+
+[[places]]
 name = "Trash"
 path = "/home/chrome/.local/share/Trash/files"
 icon = "/home/chrome/.local/share/icons/custom/recycle-basket.svg"

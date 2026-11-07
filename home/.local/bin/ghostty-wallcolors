@@ -47,36 +47,66 @@ def apart(a, b):
     return min(abs(a - b), 1 - abs(a - b))
 
 
-def picks(found):
-    """Hues that matter: vivid colours count for more than large grey areas."""
-    total = sum(c[0] for c in found) or 1
-    vivid = [c for c in found if c[4] > 0.12 and 0.07 < c[2] < 0.96]
-    scored = sorted(vivid, key=lambda c: (c[0] / total) ** 0.5 * c[4], reverse=True)
-    chosen = []
-    for count, h, l, s, chroma in scored:
-        if all(apart(h, x[0]) > 0.075 for x in chosen):
-            chosen.append((h, s, chroma))
-        if len(chosen) == 6:
-            break
+def rgb(h, s, l):
+    return colorsys.hls_to_rgb(h, l, s)
+
+
+def distance(a, b):
+    one, two = rgb(*a), rgb(*b)
+    return sum((x - y) ** 2 for x, y in zip(one, two)) ** 0.5
+
+
+def spread(found):
+    tinted = sorted((c for c in found if c[4] > 0.08), key=lambda c: c[0], reverse=True)
+    if not tinted:
+        return [(0, 0, 0.58 + 0.05 * n) for n in range(6)]
+    groups = []
+    for c in tinted:
+        for group in groups:
+            if apart(c[1], group[0][1]) <= 0.05:
+                group.append(c)
+                break
+        else:
+            groups.append([c])
+    groups.sort(key=lambda g: sum(c[0] for c in g), reverse=True)
+    top = sum(c[0] for c in groups[0])
+    groups = [g for g in groups if sum(c[0] for c in g) >= top * 0.3][:6]
+    mains = []
+    for group in groups:
+        first = max(group, key=lambda c: c[0])
+        mains.append((first[1], first[3], max(first[2], 0.58)))
+    chosen = list(mains)
+    pair = mains[:2]
+    step = 0
+    while len(chosen) < 6:
+        h, s, l = pair[step % len(pair)]
+        level = step // len(pair) + 1
+        chosen.append((h, s, min(l + (0.9 - l) * level / 5, 0.9)))
+        step += 1
     return chosen
 
 
+def flow(colors):
+    ordered = [colors[0]]
+    left = colors[1:]
+    while left:
+        step = min(left, key=lambda c: distance(c, ordered[-1]))
+        left.remove(step)
+        ordered.append(step)
+    return ordered
+
+
 def palette(found):
-    hues = picks(found)
-    if not hues:  # a truly grey wallpaper gets grey terminal colours
-        hues = [(0, 0, 0)]
-    base_h, base_s = hues[0][0], hues[0][1]
+    colors = flow(spread(found))
+    base_h, base_s = colors[0][0], colors[0][1]
     slots = {0: shade(base_h, base_s * 0.4, 0.14), 8: shade(base_h, base_s * 0.4, 0.45)}
-    count = len(hues)
-    for n, slot in enumerate((1, 2, 3, 4, 5, 6)):
-        h, s, chroma = hues[n % count]
-        # Real hues stay readable; faint tints stay faint instead of being invented.
-        s = max(s, 0.45) if chroma >= 0.25 else s
-        step = n // count
-        slots[slot] = shade(h, s, 0.66 + 0.04 * step)
-        slots[slot + 8] = shade(h, s, 0.76 + 0.03 * step)
+    for slot, (h, s, l) in zip((1, 2, 3, 4, 5, 6), colors):
+        slots[slot] = shade(h, s, l)
+        slots[slot + 8] = shade(h, s, min(l + 0.08, 0.92))
     slots[7] = shade(base_h, base_s * 0.3, 0.8)
     slots[15] = shade(base_h, base_s * 0.3, 0.93)
+    top = max(colors, key=lambda c: max(rgb(*c)) - min(rgb(*c)))
+    slots[13] = shade(*top)
     slots[67], slots[208] = slots[4], slots[3]
     return slots
 
