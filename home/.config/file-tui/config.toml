@@ -52,5 +52,5 @@ path = "/home/chrome/.local/share/Trash/files"
 icon = "/home/chrome/.local/share/icons/custom/recycle-basket.svg"
 
 [keys]
-quit = ["Ctrl+C"]
-copy = ["Alt+C"]
+quit = ["q"]
+copy = ["Ctrl+C"]
