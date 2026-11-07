@@ -7,8 +7,8 @@ rustPlatform.buildRustPackage {
   src = fetchFromGitHub {
     owner = "m4c4r0n1n";
     repo = "file-tui";
-    rev = "37d4627537cb0bdffbe76818fb30f169de788545";
-    hash = "sha256-+5rkr3AI/6jNAKLQ3vD+b7oftxtBLCdH5DCMvDyyoaw=";
+    rev = "5c01b23b14ca28d9dc591eee7d704fc0e9e33b2b";
+    hash = "sha256-PV1Rlcsi/roqmAXLqRhatoME02Qvy5aN29HYNRfIw0M=";
   };
 
   cargoHash = "sha256-ZXB1oJx5llZPx/dcll4xTWV0t0Wl95Sfkt+srsu5nZg=";
