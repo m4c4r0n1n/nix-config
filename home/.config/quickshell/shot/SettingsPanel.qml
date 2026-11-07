@@ -145,6 +145,53 @@ Item {
                 spacing: 10
 
                 Text {
+                    Layout.fillWidth: true
+                    text: I18n.tr("Hide mouse")
+                    color: Theme.inkDim
+                    font.family: Theme.ui
+                    font.pixelSize: 12
+                    font.weight: Font.Medium
+                }
+
+                Rectangle {
+                    id: pillCursor
+                    width: 44
+                    height: 24
+                    radius: 12
+                    color: Config.hideCursor ? Theme.accent : Theme.hover
+                    border.color: Config.hideCursor ? Theme.accent : Theme.hair
+                    border.width: 1
+
+                    Rectangle {
+                        width: 18
+                        height: 18
+                        radius: 9
+                        anchors.verticalCenter: parent.verticalCenter
+                        x: Config.hideCursor ? parent.width - width - 3 : 3
+                        color: Config.hideCursor ? Theme.accentInk : Theme.ink
+                        Behavior on x { NumberAnimation { duration: Theme.move } }
+
+                        Icon {
+                            anchors.centerIn: parent
+                            name: "check"
+                            size: 12
+                            tint: Theme.accent
+                            visible: Config.hideCursor
+                        }
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: { Config.hideCursor = !Config.hideCursor; Config.save(); }
+                    }
+                }
+            }
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 10
+
+                Text {
                     text: I18n.tr("Save folder")
                     color: Theme.inkDim
                     font.family: Theme.ui

@@ -4,10 +4,17 @@
 # Grab the screen first: the overlay takes focus, which closes open menus.
 dir=${XDG_RUNTIME_DIR:-/tmp}
 umask 077
+hide=1
+grep -q '"hideCursor": *false' "${XDG_CONFIG_HOME:-$HOME/.config}/quickshell/ryoshot.json" 2>/dev/null && hide=0
+if [ "$hide" = 1 ]; then
+  umbriel msg cursor-hide >/dev/null 2>&1
+  sleep 0.05
+fi
 while read -r out; do
   grim -l 1 -o "$out" "$dir/shot-frame-$out.png" &
 done < <(umbriel outputs | sed -n "s/^\([^ ]*\) \".*/\1/p")
 wait
+[ "$hide" = 1 ] && umbriel msg cursor-show >/dev/null 2>&1
 export RYOSHOT_FORCE_FALLBACK=1 SHOT_PRECAPTURED=1
 export QML_IMPORT_PATH="$HOME/.nix-profile/lib/qt-6/qml" QML2_IMPORT_PATH="$HOME/.nix-profile/lib/qt-6/qml"
 exec flock -n -o "$dir/shot-run.lock" qs -p "$HOME/.config/quickshell/shot"

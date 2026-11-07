@@ -10,6 +10,7 @@ Singleton {
     property int mosaicBlock: 12
     property real zoomFactor: 2.0
     property bool copyOnSave: false
+    property bool hideCursor: true
     property string saveDir: ""
     property int delaySeconds: 0
     property bool recordMic: false
@@ -58,6 +59,7 @@ Singleton {
             mosaicBlock: config.mosaicBlock,
             zoomFactor: config.zoomFactor,
             copyOnSave: config.copyOnSave,
+            hideCursor: config.hideCursor,
             saveDir: config.saveDir,
             delaySeconds: config.delaySeconds,
             recordMic: config.recordMic,
@@ -78,6 +80,7 @@ Singleton {
                 if (typeof c.mosaicBlock === "number") config.mosaicBlock = c.mosaicBlock;
                 if (typeof c.zoomFactor === "number") config.zoomFactor = c.zoomFactor;
                 if (typeof c.copyOnSave === "boolean") config.copyOnSave = c.copyOnSave;
+                if (typeof c.hideCursor === "boolean") config.hideCursor = c.hideCursor;
                 if (typeof c.saveDir === "string") config.saveDir = c.saveDir;
                 if (typeof c.delaySeconds === "number") config.delaySeconds = c.delaySeconds;
                 if (typeof c.recordMic === "boolean") config.recordMic = c.recordMic;
