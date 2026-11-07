@@ -248,3 +248,151 @@ html[data-nana-flip='on'] .wrapper_JJ-hgR[data-list-item-id='guildsnav___home'] 
 #app-mount .container_ybUK7Z.themed_ybUK7Z {
   background-color: color-mix(in srgb, {{colors.surface.default.hex}} 45%, transparent) !important;
 }
+
+#app-mount [class*="channelTextArea_"] {
+  background: color-mix(in srgb, {{colors.surface.default.hex}} 55%, transparent) !important;
+}
+
+#app-mount [class*="channelTextArea_"] [class*="scrollableContainer_"] {
+  background: transparent !important;
+}
+
+#app-mount [class*="sidebar_"]::after {
+  display: none !important;
+}
+
+#app-mount li[id^="chat-messages"]:has(+ li[id^="chat-messages"] > [class*="message_"]:not([class*="groupStart_"])) > [class*="message_"] {
+  border-bottom-left-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+}
+
+#app-mount li[id^="chat-messages"] > [class*="message_"]:not([class*="groupStart_"]) {
+  border-top-left-radius: 0 !important;
+  border-top-right-radius: 0 !important;
+}
+
+#app-mount .panels_pog62O {
+  background: color-mix(in srgb, {{colors.surface.default.hex}} 30%, transparent) !important;
+  border: none !important;
+}
+
+#app-mount [class*="typingGradient"],
+#app-mount [class*="TypingGradient"] {
+  mask: none !important;
+  -webkit-mask: none !important;
+  background: none !important;
+}
+
+.theme-dark,
+.theme-darker,
+.theme-midnight {
+  --app-frame-background: color-mix(in srgb, {{colors.surface.default.hex}} 35%, transparent) !important;
+  --background-base-low: color-mix(in srgb, {{colors.surface.default.hex}} 35%, transparent) !important;
+  --background-base-lower: color-mix(in srgb, {{colors.surface.default.hex}} 35%, transparent) !important;
+  --background-base-lowest: color-mix(in srgb, {{colors.surface.default.hex}} 35%, transparent) !important;
+  --chat-background: color-mix(in srgb, {{colors.surface.default.hex}} 35%, transparent) !important;
+  --chat-background-default: color-mix(in srgb, {{colors.surface.default.hex}} 35%, transparent) !important;
+  --channel-background-default: color-mix(in srgb, {{colors.surface.default.hex}} 35%, transparent) !important;
+  --home-background: color-mix(in srgb, {{colors.surface.default.hex}} 35%, transparent) !important;
+  --background-surface-high: {{colors.surface_container_high.default.hex}} !important;
+  --bg-surface-raised: {{colors.surface_container_high.default.hex}} !important;
+  --card-background-default: {{colors.surface_container_high.default.hex}} !important;
+  --card-secondary-bg: {{colors.surface_container_high.default.hex}} !important;
+  --background-secondary-alt: {{colors.surface_container_high.default.hex}} !important;
+  --input-background-default: {{colors.surface_container_high.default.hex}} !important;
+  --control-secondary-background-default: {{colors.surface_container_high.default.hex}} !important;
+  --control-connected-background-default: {{colors.surface_container_high.default.hex}} !important;
+  --user-profile-toolbar-background: {{colors.surface_container_high.default.hex}} !important;
+  --user-profile-activity-toolbar-background: {{colors.surface_container_high.default.hex}} !important;
+  --profile-gradient-note-background: {{colors.surface_container_high.default.hex}} !important;
+  --profile-gradient-role-pill-background: {{colors.surface_container_high.default.hex}} !important;
+  --modal-footer-background: {{colors.surface_container_high.default.hex}} !important;
+  --scrollbar-auto-track: {{colors.surface_container_high.default.hex}} !important;
+  --scrollbar-thin-track: {{colors.surface_container_high.default.hex}} !important;
+  --scrollbar-auto-scrollbar-color-track: {{colors.surface_container_high.default.hex}} !important;
+  --background-surface-higher: {{colors.surface_container_highest.default.hex}} !important;
+  --background-surface-highest: {{colors.surface_container_highest.default.hex}} !important;
+  --modal-background: {{colors.surface_container_highest.default.hex}} !important;
+  --user-profile-overlay-background: {{colors.surface_container_highest.default.hex}} !important;
+  --user-profile-background-hover: {{colors.surface_container_highest.default.hex}} !important;
+  --user-profile-overlay-background-hover: {{colors.surface_container_highest.default.hex}} !important;
+  --user-profile-note-background-focus: {{colors.surface_container_highest.default.hex}} !important;
+  --background-mod-subtle: color-mix(in srgb, {{colors.primary.default.hex}} 8%, transparent) !important;
+  --background-mod-muted: color-mix(in srgb, {{colors.primary.default.hex}} 8%, transparent) !important;
+  --message-background-hover: color-mix(in srgb, {{colors.primary.default.hex}} 8%, transparent) !important;
+  --message-highlight-background-default: color-mix(in srgb, {{colors.primary.default.hex}} 8%, transparent) !important;
+  --card-primary-pressed-bg: color-mix(in srgb, {{colors.primary.default.hex}} 8%, transparent) !important;
+  --card-secondary-pressed-bg: color-mix(in srgb, {{colors.primary.default.hex}} 8%, transparent) !important;
+  --background-mod-normal: color-mix(in srgb, {{colors.primary.default.hex}} 14%, transparent) !important;
+  --control-secondary-background-hover: color-mix(in srgb, {{colors.primary.default.hex}} 14%, transparent) !important;
+  --control-connected-background-hover: color-mix(in srgb, {{colors.primary.default.hex}} 14%, transparent) !important;
+  --message-highlight-background-hover: color-mix(in srgb, {{colors.primary.default.hex}} 14%, transparent) !important;
+  --background-mod-strong: color-mix(in srgb, {{colors.primary.default.hex}} 20%, transparent) !important;
+  --control-secondary-background-active: color-mix(in srgb, {{colors.primary.default.hex}} 20%, transparent) !important;
+  --control-connected-background-active: color-mix(in srgb, {{colors.primary.default.hex}} 20%, transparent) !important;
+  --border-muted: color-mix(in srgb, {{colors.outline.default.hex}} 45%, transparent) !important;
+  --border-normal: color-mix(in srgb, {{colors.outline.default.hex}} 45%, transparent) !important;
+  --border-strong: color-mix(in srgb, {{colors.outline.default.hex}} 45%, transparent) !important;
+  --border-subtle: color-mix(in srgb, {{colors.outline.default.hex}} 45%, transparent) !important;
+  --app-frame-border: color-mix(in srgb, {{colors.outline.default.hex}} 45%, transparent) !important;
+  --card-border-default: color-mix(in srgb, {{colors.outline.default.hex}} 45%, transparent) !important;
+  --chat-border: color-mix(in srgb, {{colors.outline.default.hex}} 45%, transparent) !important;
+  --input-border-default: color-mix(in srgb, {{colors.outline.default.hex}} 45%, transparent) !important;
+  --input-border-hover: color-mix(in srgb, {{colors.outline.default.hex}} 45%, transparent) !important;
+  --input-border-readonly: color-mix(in srgb, {{colors.outline.default.hex}} 45%, transparent) !important;
+  --control-secondary-border-default: color-mix(in srgb, {{colors.outline.default.hex}} 45%, transparent) !important;
+  --control-secondary-border-hover: color-mix(in srgb, {{colors.outline.default.hex}} 45%, transparent) !important;
+  --control-connected-border-default: color-mix(in srgb, {{colors.outline.default.hex}} 45%, transparent) !important;
+  --control-connected-border-hover: color-mix(in srgb, {{colors.outline.default.hex}} 45%, transparent) !important;
+  --user-profile-border: color-mix(in srgb, {{colors.outline.default.hex}} 45%, transparent) !important;
+  --user-profile-toolbar-border: color-mix(in srgb, {{colors.outline.default.hex}} 45%, transparent) !important;
+  --profile-gradient-role-pill-border: color-mix(in srgb, {{colors.outline.default.hex}} 45%, transparent) !important;
+  --input-border-active: color-mix(in srgb, {{colors.primary.default.hex}} 45%, transparent) !important;
+  --control-secondary-border-active: color-mix(in srgb, {{colors.primary.default.hex}} 45%, transparent) !important;
+  --control-connected-border-active: color-mix(in srgb, {{colors.primary.default.hex}} 45%, transparent) !important;
+  --scrollbar-auto-thumb: color-mix(in srgb, {{colors.primary.default.hex}} 45%, transparent) !important;
+  --scrollbar-thin-thumb: color-mix(in srgb, {{colors.primary.default.hex}} 45%, transparent) !important;
+  --scrollbar-auto-scrollbar-color-thumb: color-mix(in srgb, {{colors.primary.default.hex}} 45%, transparent) !important;
+  --reaction-background-default: color-mix(in srgb, {{colors.primary.default.hex}} 8%, transparent) !important;
+  --reaction-background-reacted-default: color-mix(in srgb, {{colors.primary.default.hex}} 22%, transparent) !important;
+  --reaction-border-reacted-default: {{colors.primary.default.hex}} !important;
+
+}
+
+#app-mount [class*="mentioned_"]::before {
+  background: {{colors.primary.default.hex}} !important;
+}
+
+#app-mount [class*="message_"][class*="mentioned_"] {
+  background-color: color-mix(in srgb, {{colors.primary.default.hex}} 14%, color-mix(in srgb, {{colors.surface.default.hex}} 55%, transparent)) !important;
+}
+
+#app-mount [class*="message_"][class*="groupStart_"] {
+  box-sizing: border-box !important;
+  min-height: 48px !important;
+}
+
+#app-mount [class*="message_"][class*="groupStart_"]:has([class*="repliedMessage_"]) {
+  min-height: 68px !important;
+}
+
+#app-mount [class*="item__"][class*="o8_Xq"],
+#app-mount [class*="pill_"] [class*="item_"] {
+  background-color: {{colors.primary.default.hex}} !important;
+}
+
+#app-mount [class*="interactive_"][class*="selected"] {
+  background-color: color-mix(in srgb, {{colors.primary.default.hex}} 18%, transparent) !important;
+}
+
+#app-mount [class*="form_"]::before,
+#app-mount [class*="content_"][class*="z_gUBg"]::before,
+#app-mount [class*="chatContent_"] [class*="content_"]::before {
+  display: none !important;
+}
+
+#app-mount [class*="chatContent_"] > [class*="messagesWrapper_"] {
+  clip-path: inset(0 16px 0 4px round 10px) !important;
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 18px), transparent calc(100% - 16px)) !important;
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 18px), transparent calc(100% - 16px)) !important;
+}

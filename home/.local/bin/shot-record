@@ -15,7 +15,12 @@ case ${1:-} in
       for _ in {1..100}; do kill -0 "$pid" 2>/dev/null || break; sleep 0.05; done
     fi
     file=$(cat "$state.file" 2>/dev/null); rm -f "$state" "$state.file" "$state.stopping"
-    if (( worked )); then notify-send -a Screenshot "Recording saved" "$file"
+    if (( worked )); then
+      (
+        reply=$(notify-send -a Screenshot -A default=Show -w "Recording saved" "$file")
+        [[ $reply == default ]] && gdbus call --session --dest org.freedesktop.FileManager1 --object-path /org/freedesktop/FileManager1 --method org.freedesktop.FileManager1.ShowItems "['file://$file']" "" >/dev/null
+      ) >/dev/null 2>&1 &
+      disown
     else notify-send -a Screenshot "Recording stopped" "The recorder had already quit. Nothing usable was saved."; fi ;;
   start)
     running && exit 0
