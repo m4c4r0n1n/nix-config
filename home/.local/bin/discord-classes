@@ -1,0 +1,149 @@
+#!/usr/bin/env -S nix shell --quiet --impure --expr "with import <nixpkgs> {}; python3.withPackages (p: [p.brotli])" -c python3 -I
+import collections
+import glob
+import json
+import os
+import re
+import subprocess
+import sys
+import time
+
+import brotli
+
+HOME = os.path.expanduser("~")
+CACHE = os.environ.get("DISCORD_CACHE", HOME + "/.config/vesktop/sessionData/Cache/Cache_Data")
+TEMPLATE = os.environ.get("DISCORD_TEMPLATE", HOME + "/.config/noctalia/templates/discord-wall.css")
+THEME = os.environ.get("DISCORD_THEME", HOME + "/.config/vesktop/themes/Discord-Wall.theme.css")
+SNAPSHOT = os.environ.get("DISCORD_SNAPSHOT", HOME + "/.local/state/discord-classes/modules.json")
+START_WAIT = 120
+BUILD_WINDOW = 600
+MAIN_SHEET = 50000
+MIN_MODULES = 500
+MIN_MATCH = 0.5
+ASSET = re.compile(rb"https://discord\.com/assets/[\w.\-]+\.(css|js)")
+CSS_CLASS = re.compile(r"\.([A-Za-z][A-Za-z0-9-]*_{1,2}[A-Za-z0-9_-]{5,6})(?![A-Za-z0-9_-])")
+JS_CLASS = re.compile(r"[\"']?[A-Za-z]\w*[\"']?:[\"']([A-Za-z][A-Za-z0-9-]*_{1,2}[A-Za-z0-9_-]{5,6})(?: [^\"']*)?[\"']")
+
+
+def unpack(data):
+    decoder = brotli.Decompressor()
+    parts = []
+    try:
+        for start in range(0, len(data), 64):
+            parts.append(decoder.process(data[start : start + 64]))
+    except Exception:
+        pass
+    return b"".join(parts) or data
+
+
+def split_class(name):
+    stem = name[:-6].rstrip("_")
+    hash_part = name[-6:]
+    if re.fullmatch(r"_[0-9a-f]{5}", hash_part):
+        hash_part = hash_part[1:]
+    return stem, hash_part
+
+
+def read_cache(keep):
+    entries = []
+    for path in glob.glob(CACHE + "/*_0"):
+        with open(path, "rb") as file:
+            head = file.read(600)
+        match = ASSET.search(head)
+        if match:
+            entries.append((os.path.getmtime(path), path, match))
+    modules = collections.defaultdict(set)
+    if not entries:
+        return modules
+    sheets = [entry for entry in entries if entry[2].group(1) == b"css" and os.path.getsize(entry[1]) > MAIN_SHEET]
+    newest = max(entry[0] for entry in sheets or entries)
+    for changed, path, match in entries:
+        if not keep(changed, newest):
+            continue
+        with open(path, "rb") as file:
+            data = file.read()
+        body = unpack(data[data.index(match.group()) + len(match.group()) :]).decode("utf8", "ignore")
+        pattern = CSS_CLASS if match.group(1) == b"css" else JS_CLASS
+        for name in pattern.findall(body):
+            stem, hash_part = split_class(name)
+            modules[hash_part].add(stem)
+    return modules
+
+
+def current_build():
+    return read_cache(lambda changed, newest: changed >= newest - BUILD_WINDOW)
+
+
+def template_classes():
+    with open(TEMPLATE) as file:
+        return sorted(set(CSS_CLASS.findall(file.read())))
+
+
+def save_snapshot(modules):
+    used = {split_class(name)[1] for name in template_classes()}
+    data = {key: sorted(modules[key]) for key in used if key in modules}
+    os.makedirs(os.path.dirname(SNAPSHOT), exist_ok=True)
+    with open(SNAPSHOT, "w") as file:
+        json.dump(data, file, indent=1)
+
+
+def best_module(stem, old_stems, modules):
+    best, score = None, 0
+    for key, stems in modules.items():
+        if stem in stems:
+            value = len(old_stems & stems) / len(old_stems | stems)
+            if value > score:
+                best, score = key, value
+    return best if score >= MIN_MATCH else None
+
+
+def rewrite(path, renames):
+    if not os.path.exists(path):
+        return
+    with open(path) as file:
+        text = file.read()
+    text = CSS_CLASS.sub(lambda match: "." + renames.get(match.group(1), match.group(1)), text)
+    with open(path, "w") as file:
+        file.write(text)
+
+
+def tell(message):
+    print(message)
+    subprocess.run(["notify-send", "Discord theme", message], check=False)
+
+
+def main():
+    if "--wait" in sys.argv:
+        time.sleep(START_WAIT)
+    modules = current_build()
+    if len(modules) < MIN_MODULES:
+        return print("Not enough Discord files in the cache yet.")
+    if "--snapshot" in sys.argv or not os.path.exists(SNAPSHOT):
+        save_snapshot(modules)
+        return print("Saved class snapshot.")
+    with open(SNAPSHOT) as file:
+        snapshot = {key: set(stems) for key, stems in json.load(file).items()}
+    renames, failed = {}, []
+    for name in template_classes():
+        stem, hash_part = split_class(name)
+        if stem in modules.get(hash_part, ()):
+            continue
+        key = best_module(stem, snapshot.get(hash_part, set()), modules)
+        if key:
+            renames[name] = stem + "_" + key
+        else:
+            failed.append(name)
+    if renames:
+        rewrite(TEMPLATE, renames)
+        rewrite(THEME, renames)
+        save_snapshot(modules)
+    if renames or failed:
+        tell(f"Updated {len(renames)} class names, {len(failed)} not found.")
+        for name in failed:
+            print("not found:", name)
+    else:
+        print("Theme classes are current.")
+
+
+if __name__ == "__main__":
+    main()

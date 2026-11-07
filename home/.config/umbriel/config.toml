@@ -24,7 +24,7 @@ files = ["noctalia.toml"]
 # https://docs.noctalia.dev/umbriel/configuration/#general
 #
 [general]
- autostart = ["noctalia", "/home/chrome/.local/bin/wall-server", "/home/chrome/.local/bin/wpe-restore", "/home/chrome/.local/bin/vesktop-home-toggle"]
+ autostart = ["noctalia", "/home/chrome/.local/bin/wall-server", "/home/chrome/.local/bin/wpe-restore", "/home/chrome/.local/bin/vesktop-home-toggle", "/home/chrome/.local/bin/discord-classes --wait"]
 show_cheatsheet = false
 # xwayland = false
 # Sharp X11 apps and games on scaled outputs; they see physical resolutions.
