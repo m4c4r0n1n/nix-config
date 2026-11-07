@@ -187,6 +187,7 @@
     tmux
     btop
     gh
+    glab
     fzf
     neovim
     git
