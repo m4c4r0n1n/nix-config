@@ -26,7 +26,8 @@ local totalPages = 1
 local wallpapers = {}
 local loading = false
 local errorMessage = ""
-local selectedId = ""
+local cursorIndex = 0
+local currentPath = ""
 local applying = false
 
 local puritySfw = true
@@ -409,8 +410,26 @@ local function queueThumbDownload(wallpaper)
 end
 
 local function pickWallpaper(id)
-  selectedId = id
   applyWallpaper(id)
+end
+
+local function plainName(text)
+  return string.lower(string.gsub(text, "[^%w]", ""))
+end
+
+local function readCurrentWallpaper()
+  currentPath = ""
+  for _, output in noctalia.outputs() do
+    local path = noctalia.wallpaperPath(output.name)
+    if path ~= nil then
+      currentPath = plainName(path)
+      return
+    end
+  end
+end
+
+local function isCurrentWallpaper(id)
+  return currentPath ~= "" and string.find(currentPath, plainName(id), 1, true) ~= nil
 end
 
 local function fileExtension(wallpaper)
@@ -554,6 +573,8 @@ local function fetchVideoSite()
     if result == nil or result.exitCode ~= 0 or type(result.stdout) ~= "string" then
       errorMessage = tr("error")
       wallpapers = {}
+  cursorIndex = 0
+      cursorIndex = 0
       render()
       return
     end
@@ -561,6 +582,7 @@ local function fetchVideoSite()
     local pages, parsed = parseSiteOutput(result.stdout)
     totalPages = math.max(pages, page)
     wallpapers = parsed
+    cursorIndex = 0
     render()
     ensureCacheDir(function()
       thumbQueue = {}
@@ -595,6 +617,7 @@ local function setSite(index)
   page = 1
   totalPages = 1
   wallpapers = {}
+  cursorIndex = 0
   loading = false
   fetchWallpapers()
 end
@@ -651,6 +674,8 @@ fetchWallpapers = function()
     if not res.ok then
       errorMessage = tr("error")
       wallpapers = {}
+  cursorIndex = 0
+      cursorIndex = 0
       render()
       return
     end
@@ -659,6 +684,8 @@ fetchWallpapers = function()
     if data == nil then
       errorMessage = err or tr("error")
       wallpapers = {}
+  cursorIndex = 0
+      cursorIndex = 0
       render()
       return
     end
@@ -704,6 +731,7 @@ fetchWallpapers = function()
     end
 
     wallpapers = filteredWallpapers
+    cursorIndex = 0
     totalPages = normalizeTotalPages(lastPage)
     if page > totalPages then
       page = totalPages
@@ -723,8 +751,11 @@ local function persistAndRefetch()
   fetchWallpapers()
 end
 
-local function tileBorder(wallpaper, selected)
-  if selected then
+local function tileBorder(wallpaper, current, focused)
+  if focused then
+    return "on_surface", TILE_BORDER_SELECTED
+  end
+  if current then
     return "primary", TILE_BORDER_SELECTED
   end
   local purity = wallpaper.purity
@@ -766,11 +797,14 @@ local function wallpaperPreview(wallpaper, frameWidth, frameHeight, borderColor,
   })
 end
 
-local function wallpaperTile(wallpaper)
+local function wallpaperTile(wallpaper, index)
   local id = wallpaper.id
+  local current = isCurrentWallpaper(id)
   local resolution = wallpaper.resolution or id
-  local selected = selectedId == id
-  local borderColor, borderWidth = tileBorder(wallpaper, selected)
+  if current then
+    resolution = "Current  " .. resolution
+  end
+  local borderColor, borderWidth = tileBorder(wallpaper, current, index == cursorIndex)
   local frameWidth, frameHeight = tileThumbSize()
   return ui.column({
     gap = TILE_LABEL_GAP,
@@ -792,29 +826,35 @@ end
 
 local function wallpaperGrid()
   if loading then
-    return ui.label({ text = tr("loading"), color = "on_surface_variant" })
+    return { ui.label({ text = tr("loading"), color = "on_surface_variant" }) }
   end
   if errorMessage ~= "" then
-    return ui.label({ text = errorMessage, color = "error" })
+    return { ui.label({ text = errorMessage, color = "error" }) }
   end
   if #wallpapers == 0 then
-    return ui.label({ text = tr("empty"), color = "on_surface_variant" })
+    return { ui.label({ text = tr("empty"), color = "on_surface_variant" }) }
   end
 
   local rows = {}
   local row = {}
   for index, wallpaper in ipairs(wallpapers) do
-    table.insert(row, wallpaperTile(wallpaper))
+    table.insert(row, wallpaperTile(wallpaper, index))
     if #row == COLUMNS or index == #wallpapers then
-      table.insert(rows, ui.row({ gap = COLUMN_GAP, align = "stretch" }, row))
+      local key = "row" .. math.ceil(index / COLUMNS)
+      table.insert(rows, ui.row({ key = key, gap = COLUMN_GAP, align = "stretch" }, row))
       row = {}
     end
   end
-  return ui.column({ gap = 12, align = "stretch" }, rows)
+  return rows
+end
+
+local function revealTarget()
+  return if cursorIndex > 0 then "row" .. math.ceil(cursorIndex / COLUMNS) else ""
 end
 
 render = function()
   normalizePurityFilters()
+  readCurrentWallpaper()
   local pageLabel = if applying then tr("applying") else `Page {page}`
 
   local headerContent = {
@@ -842,9 +882,7 @@ render = function()
     siteTabs(),
     if siteIndex == 1 then filtersPanel() else ui.label({ text = if siteIndex == 4 then "Search works here. MoeWalls gives 720p previews." elseif siteIndex == 5 then "Your Steam library: scenes and videos. Search works here." elseif siteIndex == 6 then "Search Steam Workshop. Click one to download and set it." else "Search works here. Filters are Wallhaven only.", fontSize = 12, color = "on_surface_variant" }),
 
-    ui.scroll({ flexGrow = 1, gap = 12 }, {
-      wallpaperGrid(),
-    }),
+    ui.scroll({ flexGrow = 1, gap = 12, revealKey = revealTarget() }, wallpaperGrid()),
 
     ui.row({ align = "center", justify = "center" }, {
       ui.row({ gap = 8, align = "center" }, {
@@ -889,6 +927,36 @@ function onOpen(_context)
   closeButton = noctalia.getSetting("shell.show_close_buttons") ~= false
   normalizePurityFilters()
   fetchWallpapers()
+end
+
+function onKey(chord, pressed)
+  if not pressed then
+    return
+  end
+  local count = #wallpapers
+  if chord == "return" then
+    if cursorIndex > 0 and wallpapers[cursorIndex] ~= nil then
+      pickWallpaper(wallpapers[cursorIndex].id)
+    else
+      onSearchClicked()
+    end
+    return
+  end
+  if count == 0 then
+    return
+  end
+  if cursorIndex == 0 then
+    cursorIndex = 1
+  elseif chord == "left" then
+    cursorIndex = math.max(1, cursorIndex - 1)
+  elseif chord == "right" then
+    cursorIndex = math.min(count, cursorIndex + 1)
+  elseif chord == "up" then
+    cursorIndex = math.max(1, cursorIndex - COLUMNS)
+  elseif chord == "down" then
+    cursorIndex = math.min(count, cursorIndex + COLUMNS)
+  end
+  render()
 end
 
 function onSearchChange(value)

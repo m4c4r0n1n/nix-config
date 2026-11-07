@@ -11,5 +11,5 @@ case ${NOCTALIA_WALLPAPER_PATH:-} in
   "$HOME"/.cache/*|"") exit 0 ;;
 esac
 # Only clear when a live wallpaper is really playing, because clearing fires this hook again.
-pgrep -x mpvpaper >/dev/null || exit 0
+pgrep -f '[/]bin/mpvpaper' >/dev/null || exit 0
 exec noctalia msg plugin noctalia/mpvpaper:service all clear-all

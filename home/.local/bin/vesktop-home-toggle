@@ -2,11 +2,11 @@
 set -euo pipefail
 file="$HOME/.config/vesktop/sessionData/vencordFiles/vencordDesktopRenderer.js"
 [ -f "$file" ] || exit 0
-grep -q 'nana-home-toggle-6' "$file" && exit 0
+grep -q 'nana-home-toggle-7' "$file" && exit 0
 sed -i '/^;(() => {$/,$d' "$file"
 cat >> "$file" <<'JS'
 ;(() => {
-  const marker = "nana-home-toggle-6";
+  const marker = "nana-home-toggle-7";
   if (window[marker]) return;
   window[marker] = true;
   const key = "nana-home-toggle";
@@ -60,6 +60,47 @@ cat >> "$file" <<'JS'
     }, true);
     note();
   };
+  const liveUrl = "http://127.0.0.1:1928/live";
+  const video = document.createElement("video");
+  video.muted = true;
+  video.loop = true;
+  video.playsInline = true;
+  video.style.cssText = "position:fixed;inset:0;width:100vw;height:100vh;object-fit:cover;z-index:-1;pointer-events:none";
+  let liveId = "";
+  let liveBlob = null;
+  const clearLive = () => {
+    video.pause();
+    video.removeAttribute("src");
+    video.load();
+    video.remove();
+    if (liveBlob) URL.revokeObjectURL(liveBlob);
+    liveBlob = null;
+  };
+  const checkLive = async () => {
+    try {
+      const id = (await (await fetch(liveUrl + "-id")).text()).trim();
+      if (id === liveId) return;
+      liveId = id;
+      if (!id) return clearLive();
+      const data = await (await fetch(liveUrl + "?v=" + id)).blob();
+      if (id !== liveId) return;
+      clearLive();
+      liveBlob = URL.createObjectURL(data);
+      video.src = liveBlob;
+      document.body.prepend(video);
+      if (!document.hidden) video.play().catch(() => {});
+    } catch {}
+  };
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) video.pause();
+    else if (video.src) video.play().catch(() => {});
+  });
+  const startLive = () => {
+    if (!document.body) return setTimeout(startLive, 500);
+    checkLive();
+    setInterval(checkLive, 3000);
+  };
+  startLive();
   const begin = () => window.Vencord?.Webpack?.onceReady?.then(start);
   if (window.Vencord?.Webpack?.onceReady) begin();
   else setTimeout(begin, 1000);

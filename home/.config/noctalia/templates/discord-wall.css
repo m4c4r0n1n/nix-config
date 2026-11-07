@@ -236,3 +236,15 @@ html[data-nana-flip='on'] .wrapper_JJ-hgR[data-list-item-id='guildsnav___home'] 
   mask-image: none !important;
   -webkit-mask-image: none !important;
 }
+
+#app-mount .tabBody_zrUwGA {
+  background-color: color-mix(in srgb, {{colors.surface.default.hex}} 45%, transparent) !important;
+}
+
+#app-mount .nowPlayingColumn_zrUwGA {
+  background: transparent !important;
+}
+
+#app-mount .container_ybUK7Z.themed_ybUK7Z {
+  background-color: color-mix(in srgb, {{colors.surface.default.hex}} 45%, transparent) !important;
+}
