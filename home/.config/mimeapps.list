@@ -81,3 +81,4 @@ application/xhtml+xml=zen-twilight.desktop;
 application/x-extension-xhtml=zen-twilight.desktop;
 application/x-extension-xht=zen-twilight.desktop;
 image/jpeg=dev.noctalia.Noctalia.Annotator.desktop;
+application/vnd.oasis.opendocument.text=writer.desktop;koreader.desktop;

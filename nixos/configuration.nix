@@ -8,10 +8,14 @@
   imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
-    ];
+    ] ++ lib.optional (builtins.pathExists /etc/nixos-local.nix) /etc/nixos-local.nix;
 
   # GRUB and the Pen-Pen theme live in penpen-boot.nix.
   boot.loader.timeout = null;
+  boot.kernelModules = [ "bfq" ];
+  services.udev.extraRules = ''
+    ACTION=="add|change", KERNEL=="sd[a-z]", ATTR{queue/rotational}=="1", ATTR{queue/scheduler}="bfq"
+  '';
   boot.consoleLogLevel = 3;
 
   # networking.hostName = "nixos"; # Define your hostname.
@@ -179,6 +183,7 @@
     calibre
     obsidian
     qbittorrent
+    filezilla
     obs-studio
     gimp
     libreoffice

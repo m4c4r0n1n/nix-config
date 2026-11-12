@@ -16,6 +16,7 @@
   fileSystems."/" =
     { device = "/dev/disk/by-uuid/4f953036-487d-416c-b8ea-cd9a43243f76";
       fsType = "ext4";
+      options = [ "noatime" ];
     };
 
   fileSystems."/boot" =
@@ -31,5 +32,6 @@
   fileSystems."/home" = {
     device = "/dev/disk/by-uuid/94853eaa-a8aa-4f39-91bf-7d304425a34b";
     fsType = "ext4";
+    options = [ "noatime" ];
  };
 }
