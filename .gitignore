@@ -1,3 +1,4 @@
 *.part
 .DS_Store
 home/.config/umbriel/noctalia.toml
+nixos/tools/target

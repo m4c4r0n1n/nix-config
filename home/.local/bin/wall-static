@@ -13,8 +13,8 @@ if [[ -n ${NOCTALIA_WALLPAPER_PATH:-} ]]; then
   fi
   [[ $(noctalia msg color-scheme-get 2>/dev/null) == *"$scheme"* ]] || noctalia msg color-scheme-set wallpaper "$scheme" >/dev/null 2>&1
 fi
-"$HOME/.local/bin/ghostty-wallcolors" &
-"$HOME/.local/bin/wall-sites" wpe-stop
+ghostty-wallcolors &
+wall-sites wpe-stop
 case ${NOCTALIA_WALLPAPER_PATH:-} in
   "$HOME"/.cache/*|"") exit 0 ;;
 esac

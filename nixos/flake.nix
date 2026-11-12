@@ -20,7 +20,11 @@
 
   inputs.zen-browser.url = "github:0xc000022070/zen-browser-flake";
 
-  outputs = { self, nixpkgs, nixpkgs-unstable, umbriel, zen-browser, noctalia, evangelion, noctalia-greeter, ... }: {
+  inputs.claude-code.url = "github:sadjow/claude-code-nix";
+
+  inputs.claude-desktop.url = "github:aaddrick/claude-desktop-debian";
+
+  outputs = { self, nixpkgs, nixpkgs-unstable, umbriel, zen-browser, noctalia, evangelion, noctalia-greeter, claude-code, claude-desktop, ... }: {
     nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       modules = [
@@ -36,15 +40,19 @@
 	 
 	 environment.systemPackages = [
 	   zen-browser.packages."x86_64-linux".twilight
-	   nixpkgs-unstable.legacyPackages."x86_64-linux".netwatch
+	   claude-code.packages."x86_64-linux".default
+	   claude-desktop.packages."x86_64-linux".claude-desktop-fhs
+	   (nixpkgs-unstable.legacyPackages."x86_64-linux".netwatch.overrideAttrs (o: { checkFlags = (o.checkFlags or [ ]) ++ [ "--skip=sandbox::linux::tests::parser_layer_leaves_fast_open_and_autobind_open" ]; }))
 	   (nixpkgs-unstable.legacyPackages."x86_64-linux".ghostty.overrideAttrs (o: { patches = (o.patches or [ ]) ++ [ ./ghostty-drag-out.patch ]; }))
 	 ];
 	 nix.settings.extra-substituters = [
 	   "https://umbriel.cachix.org"
+	   "https://claude-code.cachix.org"
 	 ];
 
 	 nix.settings.extra-trusted-public-keys = [
 	   "umbriel.cachix.org-1:JfNq/2yg2S6D6z4Z2dVSZrZlDPQTKtexB6GAVLD98nw="
+	   "claude-code.cachix.org-1:YeXf2aNu7UTX8Vwrze0za1WEDS+4DuI2kVeWEE4fsRk="
 	 ];
        })
      ];

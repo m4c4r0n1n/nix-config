@@ -1143,15 +1143,9 @@ ShellRoot {
 
     function deferPhoneCleanup(path, delaySeconds) {
         if (path.length === 0 && root.phoneTempDir.length === 0) return;
-        Quickshell.execDetached(["python3", "-c",
-            "import os,sys,time\n"
-                + "time.sleep(float(sys.argv[2])); p=sys.argv[1]; d=sys.argv[3]\n"
-                + "if p:\n"
-                + " try: os.unlink(p)\n"
-                + " except FileNotFoundError: pass\n"
-                + "try: os.rmdir(d)\n"
-                + "except OSError: pass",
-            path, String(delaySeconds), root.phoneTempDir]);
+        Quickshell.execDetached(["sh", "-c",
+            "sleep \"$1\"; [ -z \"$2\" ] || rm -f -- \"$2\"; rmdir -- \"$3\" 2>/dev/null; true",
+            "sh", String(delaySeconds), path, root.phoneTempDir]);
     }
 
     Component.onDestruction: root.deferPhoneCleanup(root.phoneFile, 0)

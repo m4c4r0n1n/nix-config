@@ -24,7 +24,7 @@ files = ["noctalia.toml"]
 # https://docs.noctalia.dev/umbriel/configuration/#general
 #
 [general]
- autostart = ["noctalia", "/home/chrome/.local/bin/wall-server", "/home/chrome/.local/bin/wpe-restore", "/home/chrome/.local/bin/vesktop-home-toggle", "/home/chrome/.local/bin/discord-classes --wait"]
+ autostart = ["noctalia", "wall-server", "/home/chrome/.local/bin/wpe-restore", "/home/chrome/.local/bin/vesktop-home-toggle", "discord-classes --wait"]
 show_cheatsheet = false
 # xwayland = false
 # Sharp X11 apps and games on scaled outputs; they see physical resolutions.
@@ -190,6 +190,7 @@ numlock_toggle = true
 "Mod+Shift+Escape" = { action = "shortcuts-inhibit-toggle", allow_when_inhibited = true, repeat = false }
 "Mod+B" = { action = "spawn zen-twilight", repeat = false }
 "Mod+E" = { action = "spawn thunar", repeat = false }
+"Mod+D" = { action = "spawn bash /home/chrome/Projects/project-chat/scripts/vfd-next.sh", repeat = false }
 "Mod+Shift+M" = { action = "spawn /home/chrome/.local/bin/music", repeat = false }
 "Mod+Shift+S" = { action = "spawn /home/chrome/.local/bin/shot", repeat = false }
 "Print" = { action = "spawn /home/chrome/.local/bin/shot", repeat = false }

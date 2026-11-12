@@ -1,7 +1,7 @@
 diff -ru a/src/theme/custom_schemes.cpp b/src/theme/custom_schemes.cpp
---- a/src/theme/custom_schemes.cpp	2026-11-07 02:56:28.560971697 -0500
-+++ b/src/theme/custom_schemes.cpp	2026-11-07 02:59:08.921967698 -0500
-@@ -552,7 +552,7 @@
+--- a/src/theme/custom_schemes.cpp	2026-11-12 00:57:12.916381203 -0500
++++ b/src/theme/custom_schemes.cpp	2026-11-12 00:57:12.944225968 -0500
+@@ -581,7 +581,7 @@
          }
          const Color base = finalColors.front();
          const double offset = static_cast<double>(finalColors.size()) * 60.0;
@@ -10,7 +10,7 @@ diff -ru a/src/theme/custom_schemes.cpp b/src/theme/custom_schemes.cpp
        }
  
        finalColors.resize(static_cast<size_t>(k));
-@@ -932,28 +932,8 @@
+@@ -967,29 +967,8 @@
        const Color primary = palette.empty() ? Color(255, 245, 155) : palette[0];
        auto [primary_h, primary_s, primary_l] = primary.toHsl();
        (void)primary_l;
@@ -21,8 +21,9 @@ diff -ru a/src/theme/custom_schemes.cpp b/src/theme/custom_schemes.cpp
 -        const auto [sh, ss, sl] = palette[1].toHsl();
 -        (void)ss;
 -        (void)sl;
--        if (hueDistance(primary_h, sh) > MIN_HUE_DISTANCE)
+-        if (hueDistance(primary_h, sh) > MIN_HUE_DISTANCE) {
 -          secondary = palette[1];
+-        }
 -      }
 -      Color tertiary = shiftHue(primary, 60.0);
 -      if (palette.size() > 2) {

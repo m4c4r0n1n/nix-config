@@ -5,7 +5,7 @@ diff -ru a/src/shell/panel/panel_manager.cpp b/src/shell/panel/panel_manager.cpp
  
  #include "compositors/compositor_platform.h"
  #include "config/config_service.h"
-+#include "core/process/process.h"
++#include "system/process.h"
  #include "core/deferred_call.h"
  #include "core/input/key_chord.h"
  #include "core/input/keybind_matcher.h"

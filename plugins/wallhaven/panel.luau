@@ -542,7 +542,7 @@ local SITE_IDS = { "", "motionbgs", "livebgs", "moewalls", "wpe", "steam" }
 local siteIndex = 1
 local LIVE_DIR = noctalia.expandPath("~/Pictures/Live Wallpapers")
 local USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0"
-local SITE_HELPER = noctalia.expandPath("~/.local/bin/wall-sites")
+local SITE_HELPER = "wall-sites"
 
 local function siteName()
   return SITE_IDS[siteIndex]
