@@ -3,15 +3,15 @@
 ## My NixOS with Umbriel WM.
 
 <p align="center">
-  <img width="640" alt="nix-fetch" src="https://github.com/user-attachments/assets/1034dfb7-6ab0-49d3-8b7b-97be0b02327f" />
+  <img width="640" alt="nix-fetch" src="images/nix-fetch.gif" />
 </p>
 
 ### Music
 
 <table>
   <tr>
-    <td width="50%"><img src="https://github.com/user-attachments/assets/30028319-b511-4e75-93e8-678305e457c8" width="100%" alt="Mousiki playing a track" /></td>
-    <td width="50%"><img src="https://github.com/user-attachments/assets/ed19d99c-647c-4c8f-830d-702923474405" width="100%" alt="Mousiki with lyrics showing" /></td>
+    <td width="50%"><img src="images/mousiki-track.png" width="100%" alt="Mousiki playing a track" /></td>
+    <td width="50%"><img src="images/mousiki-lyrics.png" width="100%" alt="Mousiki with lyrics showing" /></td>
   </tr>
 </table>
 
