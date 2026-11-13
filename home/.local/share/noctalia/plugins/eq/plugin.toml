@@ -1,0 +1,19 @@
+id = "chrome/eq"
+name = "Equalizer"
+version = "1.0.0"
+plugin_api = 43
+author = "chrome"
+license = "MIT"
+dependencies = []
+tags = ["audio"]
+icon = "adjustments-horizontal"
+description = "10-band EQ for the Arctis and Arena 9."
+
+[[panel]]
+id = "panel"
+entry = "panel.luau"
+width = 560
+height = "content"
+max_height = 760
+placement = "floating"
+position = "center"

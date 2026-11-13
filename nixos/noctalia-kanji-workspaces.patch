@@ -1,0 +1,42 @@
+--- a/src/shell/bar/widgets/workspaces_widget.cpp
++++ b/src/shell/bar/widgets/workspaces_widget.cpp
+@@ -39,6 +39,29 @@
+ 
+   constexpr float workspaceLabelFontSize(bool minimal) { return minimal ? Style::fontSizeBody : Style::fontSizeMini; }
+ 
++  std::string kanjiNumber(std::string_view digits) {
++    static constexpr const char* kDigits[] = {"", "一", "二", "三", "四", "五", "六", "七", "八", "九"};
++    int value = 0;
++    for (const char c : digits) {
++      value = value * 10 + (c - '0');
++      if (value > 99) {
++        return std::string(digits);
++      }
++    }
++    if (value == 0) {
++      return "〇";
++    }
++    std::string out;
++    if (value >= 10) {
++      if (value >= 20) {
++        out += kDigits[value / 10];
++      }
++      out += "十";
++    }
++    out += kDigits[value % 10];
++    return out;
++  }
++
+   // Numeric workspace IDs ("10", "11") must not be truncated like word labels.
+   bool isNumericLabel(std::string_view label) {
+     return !label.empty()
+@@ -1491,6 +1514,9 @@
+   if (!isNumericLabel(label) && m_maxLabelChars > 0) {
+     label = StringUtils::truncateUtf8CodePoints(label, m_maxLabelChars);
+   }
++  if (isNumericLabel(label)) {
++    label = kanjiNumber(label);
++  }
+ 
+   return label;
+ }

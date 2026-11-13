@@ -10,7 +10,7 @@ border_width = 0.0
 shadow = false
 compositor_blur = false
 concave_edge_corners = false
-start = ["wallpaper", "live", "wallhaven", "workspaces"]
+start = ["workspaces"]
 center = ["cava", "clock"]
 end = ["weather", "hdr", "cpu-temp", "gpu-temp", "media", "tray", "notifications", "network", "bluetooth", "volume", "brightness", "battery", "control-center", "session"]
 

@@ -17,7 +17,8 @@ SimpleEventHook {
     end
     local nodes_om = source:call ("get-object-manager", "node")
     for node in nodes_om:iterate {
-      Constraint { "media.class", "=", "Stream/Output/Audio" }
+      Constraint { "media.class", "=", "Stream/Output/Audio" },
+      Constraint { "node.link-group", "-" },
     } do
       local id = node ["bound-id"]
       metadata:set (id, "target.object", nil, nil)

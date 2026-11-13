@@ -1,0 +1,22 @@
+--- a/src/shell/control_center/tabs/audio_tab.cpp
++++ b/src/shell/control_center/tabs/audio_tab.cpp
+@@ -1713,6 +1713,19 @@
+               })
+           ),
+           ui::button({
++              .glyph = "adjustments-horizontal",
++              .glyphSize = Style::fontSizeCaption * scale,
++              .variant = ButtonVariant::Ghost,
++              .tooltip = "Equalizer",
++              .minWidth = Style::controlHeightSm * scale,
++              .minHeight = Style::controlHeightSm * scale,
++              .padding = Style::spaceXs * scale,
++              .radius = Style::scaledRadiusMd(scale),
++              .visible = card.devicePrefixKey == "control-center.audio.output-device-prefix",
++              .participatesInLayout = card.devicePrefixKey == "control-center.audio.output-device-prefix",
++              .onClick = [] { PanelManager::instance().togglePanel("chrome/eq:panel"); },
++          }),
++          ui::button({
+               .out = &card.state.menuButton,
+               .glyph = "more-vertical",
+               .glyphSize = Style::fontSizeCaption * scale,

@@ -129,8 +129,11 @@
   nix.gc = {
     automatic = true;
     dates = "weekly";
-    options = "--delete-older-than 7d";
+    options = "";
   };
+  systemd.services.nix-gc.preStart = ''
+    ${config.nix.package}/bin/nix-env -p /nix/var/nix/profiles/system --delete-generations +2
+  '';
   system.stateVersion = "26.05"; # Did you read the comment?
 
   users.groups.chrome.gid = 1000;

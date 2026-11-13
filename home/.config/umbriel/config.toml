@@ -24,7 +24,7 @@ files = ["noctalia.toml"]
 # https://docs.noctalia.dev/umbriel/configuration/#general
 #
 [general]
- autostart = ["noctalia", "wall-server", "/home/chrome/.local/bin/wpe-restore", "/home/chrome/.local/bin/vesktop-home-toggle", "discord-classes --wait"]
+ autostart = ["noctalia", "wall-server", "/home/chrome/.local/bin/wpe-restore", "/home/chrome/.local/bin/vesktop-home-toggle", "discord-classes --wait", "eq restore"]
 show_cheatsheet = false
 # xwayland = false
 # Sharp X11 apps and games on scaled outputs; they see physical resolutions.
@@ -184,20 +184,22 @@ numlock_toggle = true
 
 # Applications and session
 "Mod+Return" = { action = "spawn ghostty", repeat = false }
-"Mod" = "spawn noctalia msg panel-toggle launcher"
+"Mod+S" = { action = "spawn noctalia msg panel-toggle launcher", repeat = false }
+"Mod+Alt+E" = { action = "spawn noctalia msg panel-toggle chrome/eq:panel", repeat = false }
 "Mod+Q" = { action = "window-close", repeat = false }
 "Mod+Escape" = "session-quit"
 "Mod+Shift+Escape" = { action = "shortcuts-inhibit-toggle", allow_when_inhibited = true, repeat = false }
 "Mod+B" = { action = "spawn zen-twilight", repeat = false }
 "Mod+E" = { action = "spawn thunar", repeat = false }
 "Mod+D" = { action = "spawn bash /home/chrome/Projects/project-chat/scripts/vfd-next.sh", repeat = false }
+"Ctrl+Shift+D" = { action = "spawn bash /home/chrome/Projects/project-chat/scripts/vfd-next.sh saver", repeat = false }
 "Mod+Shift+M" = { action = "spawn /home/chrome/.local/bin/music", repeat = false }
 "Mod+Shift+S" = { action = "spawn /home/chrome/.local/bin/shot", repeat = false }
 "Print" = { action = "spawn /home/chrome/.local/bin/shot", repeat = false }
 "Mod+Alt+R" = { action = "spawn /home/chrome/.local/bin/shot-record stop", repeat = false }
 "Mod+V" = { action = "spawn noctalia msg panel-toggle clipboard", repeat = false }
 "Mod+Shift+V" = { action = "spawn noctalia msg panel-toggle launcher /emo", repeat = false }
-"Mod+C" = { action = "spawn noctalia msg panel-toggle control-center home", repeat = false }
+"Mod+A" = { action = "spawn noctalia msg panel-toggle control-center home", repeat = false }
 "Ctrl+Shift+E" = { action = "spawn ghostty -e file-tui", repeat = false }
 "Mod+Slash" = { action = "cheatsheet-toggle", repeat = false }
 "Mod+Shift+P" = { action = "spawn /home/chrome/.local/bin/power-menu", repeat = false }
