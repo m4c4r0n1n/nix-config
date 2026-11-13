@@ -8,7 +8,7 @@
   imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
-    ] ++ lib.optional (builtins.pathExists /etc/nixos-local.nix) /etc/nixos-local.nix;
+    ] ++ lib.optional (builtins.pathExists ./local.nix) ./local.nix;   # this machine only, not in git
 
   # GRUB and the Pen-Pen theme live in penpen-boot.nix.
   boot.loader.timeout = null;
