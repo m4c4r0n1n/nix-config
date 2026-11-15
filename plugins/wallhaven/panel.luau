@@ -537,8 +537,8 @@ local function parseSearchResponse(body)
 end
 
 -- Local addition: video wallpaper sites beside Wallhaven.
-local SITES = { "Wallhaven", "MotionBGs", "LiveBgs", "MoeWalls", "Wallpaper Engine", "Steam Workshop" }
-local SITE_IDS = { "", "motionbgs", "livebgs", "moewalls", "wpe", "steam" }
+local SITES = { "Wallhaven", "MotionBGs", "LiveBgs", "MoeWalls", "Steam Workshop" }
+local SITE_IDS = { "", "motionbgs", "livebgs", "moewalls", "steam" }
 local siteIndex = 1
 local LIVE_DIR = noctalia.expandPath("~/Pictures/Live Wallpapers")
 local USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0"
@@ -899,7 +899,7 @@ render = function()
     }),
 
     siteTabs(),
-    if siteIndex == 1 then filtersPanel() else ui.label({ text = if siteIndex == 4 then "Search works here. MoeWalls gives 720p previews." elseif siteIndex == 5 then "Your Steam library: scenes and videos. Search works here." elseif siteIndex == 6 then "Search Steam Workshop. Click one to download and set it." else "Search works here. Filters are Wallhaven only.", fontSize = 12, color = "on_surface_variant" }),
+    if siteIndex == 1 then filtersPanel() else ui.label({ text = if siteIndex == 4 then "Search works here. MoeWalls gives 720p previews." elseif siteIndex == 5 then "Search Steam Workshop. Click one to download and set it." else "Search works here. Filters are Wallhaven only.", fontSize = 12, color = "on_surface_variant" }),
 
     ui.scroll({ flexGrow = 1, gap = 12, revealKey = revealTarget() }, wallpaperGrid()),
 

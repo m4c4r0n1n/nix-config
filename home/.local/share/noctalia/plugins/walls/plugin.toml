@@ -1,0 +1,20 @@
+id = "chrome/walls"
+name = "Wallpapers"
+version = "2.0.0"
+plugin_api = 43
+author = "chrome"
+license = "MIT"
+dependencies = []
+tags = ["wallpaper"]
+icon = "photo"
+description = "Still, live and Wallpaper Engine wallpapers, filtered by the palettes your wallpapers have."
+
+[[panel]]
+id = "picker"
+entry = "picker.luau"
+width = 3240
+height = 640
+placement = "floating"
+position = "center"
+keyboard_focus = "exclusive"
+capture_keys = ["left", "right", "up", "down", "return", "escape", "tab"]

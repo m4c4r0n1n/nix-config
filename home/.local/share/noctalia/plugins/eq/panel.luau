@@ -1,7 +1,7 @@
 local FREQS = { "60", "170", "310", "600", "1k", "3k", "6k", "12k", "14k", "16k" }
 local DEVICES = { { id = "arctis", label = "Arctis" }, { id = "arena9", label = "Arena 9" } }
-local PRESETS = { "flat", "classical", "club", "dance", "fullbass", "fullbasstreble", "fulltreble", "headphones", "largehall", "live", "party", "pop", "reggae", "rock", "ska", "soft", "softrock", "techno" }
-local PRESET_LABELS = { "Flat", "Classical", "Club", "Dance", "Full Bass", "Full Bass & Treble", "Full Treble", "Headphones", "Large Hall", "Live", "Party", "Pop", "Reggae", "Rock", "Ska", "Soft", "Soft Rock", "Techno" }
+local PRESETS = { "flat", "anime", "movies", "classical", "club", "dance", "fullbass", "fullbasstreble", "fulltreble", "headphones", "largehall", "live", "party", "pop", "reggae", "rock", "ska", "soft", "softrock", "techno" }
+local PRESET_LABELS = { "Flat", "Anime", "Movies", "Classical", "Club", "Dance", "Full Bass", "Full Bass & Treble", "Full Treble", "Headphones", "Large Hall", "Live", "Party", "Pop", "Reggae", "Rock", "Ska", "Soft", "Soft Rock", "Techno" }
 
 local device = 1
 local gains = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
@@ -121,7 +121,10 @@ render = function()
         onChange = function(index)
           local name = PRESETS[(tonumber(index) or 0) + 1]
           if name then
-            noctalia.runAsync({ "eq", DEVICES[device].id, name }, function()
+            noctalia.runAsync({ "eq", DEVICES[device].id, name }, function(result)
+              if result == nil or result.exitCode ~= 0 then
+                noctalia.notify("Equalizer", if result and result.stderr ~= "" then result.stderr else "eq failed")
+              end
               loadState()
               render()
             end)

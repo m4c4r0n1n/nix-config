@@ -13,6 +13,18 @@
   # GRUB and the Pen-Pen theme live in penpen-boot.nix.
   boot.loader.timeout = null;
   boot.kernelModules = [ "bfq" ];
+  systemd.services.docker.serviceConfig = {
+    IOSchedulingClass = "idle";
+    CPUSchedulingPolicy = "idle";
+    Nice = 19;
+  };
+  systemd.services.shrimpcat-stats.serviceConfig = {
+    IOSchedulingClass = "idle";
+    Nice = 19;
+  };
+  systemd.services.lactd.serviceConfig.IOSchedulingClass = "idle";
+  systemd.services.NetworkManager-wait-online.enable = false;
+  networking.modemmanager.enable = false;
   services.udev.extraRules = ''
     ACTION=="add|change", KERNEL=="sd[a-z]", ATTR{queue/rotational}=="1", ATTR{queue/scheduler}="bfq"
   '';
@@ -190,6 +202,7 @@
     filezilla
     obs-studio
     gimp
+    blender
     libreoffice
     mpv
     spotify

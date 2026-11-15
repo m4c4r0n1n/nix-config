@@ -116,14 +116,13 @@
     },
     {
       "type": "command",
-      "key": "       OS Age",
-      "keyColor": "magenta",
-      "text": "echo $(( ($(date +%s) - $(stat -c %W /)) / 86400 )) days"
+      "key": " ",
+      "text": "a=\"$(( ($(date +%s) - $(stat -c %W /)) / 86400 )) days\"; s=$(cut -d. -f1 /proc/uptime); u=\"\"; f() { [ $1 -gt 0 ] && u=\"$u$1 $2$([ $1 -ne 1 ] && echo s), \"; }; f $((s/86400)) day; f $((s%86400/3600)) hour; f $((s%3600/60)) min; u=\"${u%, }\"; [ -z \"$u\" ] && u=\"0 mins\"; w=$(( ${#a} > ${#u} ? ${#a} : ${#u} )); p=$(( (66 - 8 - w) / 2 )); printf '%*s\\033[35mOS Age\\033[0m: %s\\n' $p '' \"$a\""
     },
     {
-      "type": "uptime",
-      "key": "       Uptime",
-      "keyColor": "magenta"
+      "type": "command",
+      "key": " ",
+      "text": "a=\"$(( ($(date +%s) - $(stat -c %W /)) / 86400 )) days\"; s=$(cut -d. -f1 /proc/uptime); u=\"\"; f() { [ $1 -gt 0 ] && u=\"$u$1 $2$([ $1 -ne 1 ] && echo s), \"; }; f $((s/86400)) day; f $((s%86400/3600)) hour; f $((s%3600/60)) min; u=\"${u%, }\"; [ -z \"$u\" ] && u=\"0 mins\"; w=$(( ${#a} > ${#u} ? ${#a} : ${#u} )); p=$(( (66 - 8 - w) / 2 )); printf '%*s\\033[35mUptime\\033[0m: %s\\n' $p '' \"$u\""
     },
     {
       "type": "custom",

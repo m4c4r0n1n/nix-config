@@ -281,6 +281,12 @@ fn forget_static() {
     let _ = fs::remove_file(format!("/run/user/{}/wall-static-last", uid()));
 }
 
+fn live_apply(path: &str) {
+    forget_static();
+    wpe_stop();
+    run_quiet("noctalia", &["msg", "plugin", "noctalia/mpvpaper:service", "all", "set", path]);
+}
+
 fn wpe_apply(id: &str) {
     forget_static();
     wpe_hold(30);
@@ -458,6 +464,7 @@ fn main() {
         "wpe-apply" => wpe_apply(arg(2)),
         "wpe-stop" => wpe_stop(),
         "wpe-restore" => wpe_restore(),
+        "live-apply" => live_apply(arg(2)),
         site => {
             let lister: fn(&str, i64) -> Listing = match site {
                 "motionbgs" => motionbgs,
@@ -467,7 +474,7 @@ fn main() {
                 "steam" => steam,
                 _ => {
                     eprintln!("usage: wall-sites <motionbgs|livebgs|moewalls|wpe|steam> PAGE [QUERY...]");
-                    eprintln!("       wall-sites <preview|steam-fetch|video-fetch|wpe-apply|wpe-stop|wpe-restore> ...");
+                    eprintln!("       wall-sites <preview|steam-fetch|video-fetch|wpe-apply|wpe-stop|wpe-restore|live-apply> ...");
                     std::process::exit(2);
                 }
             };
