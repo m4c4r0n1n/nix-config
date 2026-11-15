@@ -280,7 +280,6 @@ local function paletteColumn(accent)
       align = "center",
       height = 30,
       paddingH = if on then 0 else 2,
-      fill = if on then accent .. "24" else nil,
       onClick = function()
         group = p.group
         pos = 1
@@ -455,10 +454,16 @@ render = function()
   }))
 end
 
-function onKey(chord, pressed)
-  if not pressed then
-    return
-  end
+local REPEAT_DELAY = 350
+local REPEAT_EVERY = 55
+local held = nil
+
+local function stopRepeat()
+  held = nil
+  panel.setNeedsFrameTick(false)
+end
+
+local function step(chord)
   local list = filtered()
   if chord == "escape" then
     panel.close()
@@ -495,6 +500,45 @@ function onKey(chord, pressed)
     pos = 1
     render()
   end
+end
+
+function onKey(chord, pressed)
+  local repeats = chord == "left" or chord == "right" or chord == "up" or chord == "down"
+  if not pressed then
+    if held ~= nil and held.chord == chord then
+      stopRepeat()
+    end
+    return
+  end
+  if held ~= nil and held.chord == chord then
+    return
+  end
+  stopRepeat()
+  step(chord)
+  if repeats then
+    held = { chord = chord, wait = REPEAT_DELAY }
+    panel.setNeedsFrameTick(true)
+  end
+end
+
+function onFrameTick(deltaMs)
+  if held == nil then
+    panel.setNeedsFrameTick(false)
+    return
+  end
+  held.wait -= deltaMs
+  while held ~= nil and held.wait <= 0 do
+    held.wait += REPEAT_EVERY
+    local before = `{pos}:{group}`
+    step(held.chord)
+    if before == `{pos}:{group}` then
+      stopRepeat()
+    end
+  end
+end
+
+function onClose()
+  stopRepeat()
 end
 
 function onOpen(context)

@@ -1,6 +1,5 @@
-diff -ru a/src/theme/custom_schemes.cpp b/src/theme/custom_schemes.cpp
---- a/src/theme/custom_schemes.cpp	2026-11-12 00:57:12.916381203 -0500
-+++ b/src/theme/custom_schemes.cpp	2026-11-12 00:57:12.944225968 -0500
+--- a/src/theme/custom_schemes.cpp	2026-11-15 02:16:52.433034684 -0500
++++ b/src/theme/custom_schemes.cpp	2026-11-15 02:16:52.434451845 -0500
 @@ -581,7 +581,7 @@
          }
          const Color base = finalColors.front();
@@ -10,7 +9,7 @@ diff -ru a/src/theme/custom_schemes.cpp b/src/theme/custom_schemes.cpp
        }
  
        finalColors.resize(static_cast<size_t>(k));
-@@ -967,29 +967,8 @@
+@@ -967,43 +967,42 @@
        const Color primary = palette.empty() ? Color(255, 245, 155) : palette[0];
        auto [primary_h, primary_s, primary_l] = primary.toHsl();
        (void)primary_l;
@@ -35,10 +34,116 @@ diff -ru a/src/theme/custom_schemes.cpp b/src/theme/custom_schemes.cpp
 -        (void)sl;
 -        if (hueDistance(primary_h, th) > MIN_HUE_DISTANCE && hueDistance(sh, th) > MIN_HUE_DISTANCE) {
 -          tertiary = palette[2];
--        }
--      }
-+      const Color secondary = palette.size() > 1 ? palette[1] : primary;
-+      const Color tertiary = palette.size() > 2 ? palette[2] : secondary;
++      std::vector<Color> real;
++      for (const auto& c : palette) {
++        if (std::ranges::none_of(real, [&](const Color& r) { return r.toArgb() == c.toArgb(); })) {
++          real.push_back(c);
+         }
+       }
        const Color error = findErrorColor(palette);
  
-       auto clamp = [](double v, double lo, double hi) { return std::clamp(v, lo, hi); };
+-      auto clamp = [](double v, double lo, double hi) { return std::clamp(v, lo, hi); };
++      auto upTo = [](double v, double hi) { return std::min(v, hi); };
++      auto shade = [](const Color& c, double dl) {
++        auto [h, s, l] = c.toHsl();
++        return fromHsl(h, s, std::clamp(l + dl, 0.50, 0.95));
++      };
+ 
+       auto [ph, ps, pl] = primary.toHsl();
+-      const Color primary_adjusted = fromHsl(ph, clamp(ps, 0.30, 0.55), std::max(pl, 0.65));
+-      auto [sh2, ss2, sl2] = secondary.toHsl();
+-      const Color secondary_adjusted = fromHsl(sh2, clamp(ss2, 0.24, 0.45), std::max(sl2, 0.60));
+-      auto [th2, ts2, tl2] = tertiary.toHsl();
+-      const Color tertiary_adjusted = fromHsl(th2, clamp(ts2, 0.20, 0.40), std::max(tl2, 0.60));
++      const Color primary_adjusted = fromHsl(ph, upTo(ps, 0.55), std::max(pl, 0.65));
++      auto [pah, pas, pal] = primary_adjusted.toHsl();
++      (void)pah;
++      (void)pas;
++      const double step = pal > 0.78 ? -0.14 : 0.12;
++      Color secondary_adjusted = shade(primary_adjusted, step);
++      if (real.size() > 1) {
++        auto [sh2, ss2, sl2] = real[1].toHsl();
++        secondary_adjusted = fromHsl(sh2, upTo(ss2, 0.45), std::max(sl2, 0.60));
++      }
++      Color tertiary_adjusted = real.size() > 1 ? shade(secondary_adjusted, step) : shade(primary_adjusted, step * 2.0);
++      if (real.size() > 2) {
++        auto [th2, ts2, tl2] = real[2].toHsl();
++        tertiary_adjusted = fromHsl(th2, upTo(ts2, 0.40), std::max(tl2, 0.60));
++      }
++      const Color secondary = secondary_adjusted;
++      const Color tertiary = tertiary_adjusted;
+ 
+       auto makeContainerDark = [](const Color& base) {
+         auto [h, s, l] = base.toHsl();
+-        return fromHsl(h, std::min(s + 0.08, 0.60), std::max(l - 0.35, 0.15));
++        return fromHsl(h, s, std::max(l - 0.35, 0.15));
+       };
+       const Color primary_container = makeContainerDark(primary_adjusted);
+       const Color secondary_container = makeContainerDark(secondary_adjusted);
+@@ -1020,21 +1019,21 @@
+       const Color surface_container_high = adjustSurface(base_surface, 0.18, 0.20);
+       const Color surface_container_highest = adjustSurface(base_surface, 0.20, 0.24);
+ 
+-      const Color base_on_surface = fromHsl(primary_h, 0.04, 0.95);
++      const Color base_on_surface = fromHsl(primary_h, upTo(primary_s, 0.04), 0.95);
+       const Color on_surface = ensureContrast(base_on_surface, surface, 4.5);
+-      const Color base_on_surface_variant = fromHsl(primary_h, 0.05, 0.70);
++      const Color base_on_surface_variant = fromHsl(primary_h, upTo(primary_s, 0.05), 0.70);
+       const Color on_surface_variant = ensureContrast(base_on_surface_variant, surface_variant, 4.5);
+ 
+-      const Color outline = ensureContrast(fromHsl(primary_h, 0.10, 0.30), surface, 3.0);
+-      const Color outline_variant = ensureContrast(fromHsl(primary_h, 0.12, 0.40), surface, 3.0);
++      const Color outline = ensureContrast(fromHsl(primary_h, upTo(primary_s, 0.10), 0.30), surface, 3.0);
++      const Color outline_variant = ensureContrast(fromHsl(primary_h, upTo(primary_s, 0.12), 0.40), surface, 3.0);
+ 
+-      const Color dark_fg = fromHsl(primary_h, 0.12, 0.12);
++      const Color dark_fg = fromHsl(primary_h, upTo(primary_s, 0.12), 0.12);
+       const Color on_primary = ensureContrast(dark_fg, primary_adjusted, 4.5);
+       const Color on_secondary = ensureContrast(dark_fg, secondary_adjusted, 4.5);
+       const Color on_tertiary = ensureContrast(dark_fg, tertiary_adjusted, 4.5);
+       const Color on_error = ensureContrast(dark_fg, error, 4.5);
+ 
+-      const Color on_primary_container = ensureContrast(fromHsl(primary_h, 0.20, 0.90), primary_container, 4.5, 1);
++      const Color on_primary_container = ensureContrast(fromHsl(primary_h, upTo(primary_s, 0.20), 0.90), primary_container, 4.5, 1);
+       auto [sec_h, sec_s, _sl] = secondary.toHsl();
+       (void)_sl;
+       const Color on_secondary_container =
+@@ -1051,9 +1050,9 @@
+       const Color shadow = surface;
+       const Color scrim = Color(0, 0, 0);
+ 
+-      const Color inverse_surface = fromHsl(primary_h, 0.05, 0.90);
+-      const Color inverse_on_surface = fromHsl(primary_h, 0.04, 0.15);
+-      const Color inverse_primary = fromHsl(primary_h, clamp(primary_s * 0.65, 0.25, 0.45), 0.40);
++      const Color inverse_surface = fromHsl(primary_h, upTo(primary_s, 0.05), 0.90);
++      const Color inverse_on_surface = fromHsl(primary_h, upTo(primary_s, 0.04), 0.15);
++      const Color inverse_primary = fromHsl(primary_h, upTo(primary_s * 0.65, 0.45), 0.40);
+ 
+       const Color background = surface;
+       const Color on_background = on_surface;
+@@ -1061,18 +1060,18 @@
+       auto makeFixedDark = [&](const Color& base) {
+         auto [h, s, l] = base.toHsl();
+         (void)l;
+-        return std::pair<Color, Color>{fromHsl(h, clamp(s, 0.30, 0.55), 0.85), fromHsl(h, clamp(s, 0.26, 0.48), 0.75)};
++        return std::pair<Color, Color>{fromHsl(h, upTo(s, 0.55), 0.85), fromHsl(h, upTo(s, 0.48), 0.75)};
+       };
+       auto [primary_fixed, primary_fixed_dim] = makeFixedDark(primary_adjusted);
+       auto [secondary_fixed, secondary_fixed_dim] = makeFixedDark(secondary_adjusted);
+       auto [tertiary_fixed, tertiary_fixed_dim] = makeFixedDark(tertiary_adjusted);
+ 
+-      const Color on_primary_fixed = ensureContrast(fromHsl(primary_h, 0.10, 0.15), primary_fixed, 4.5);
+-      const Color on_primary_fixed_variant = ensureContrast(fromHsl(primary_h, 0.10, 0.20), primary_fixed_dim, 4.5);
+-      const Color on_secondary_fixed = ensureContrast(fromHsl(sec_h, 0.10, 0.15), secondary_fixed, 4.5);
+-      const Color on_secondary_fixed_variant = ensureContrast(fromHsl(sec_h, 0.10, 0.20), secondary_fixed_dim, 4.5);
+-      const Color on_tertiary_fixed = ensureContrast(fromHsl(ter_h, 0.10, 0.15), tertiary_fixed, 4.5);
+-      const Color on_tertiary_fixed_variant = ensureContrast(fromHsl(ter_h, 0.10, 0.20), tertiary_fixed_dim, 4.5);
++      const Color on_primary_fixed = ensureContrast(fromHsl(primary_h, upTo(primary_s, 0.10), 0.15), primary_fixed, 4.5);
++      const Color on_primary_fixed_variant = ensureContrast(fromHsl(primary_h, upTo(primary_s, 0.10), 0.20), primary_fixed_dim, 4.5);
++      const Color on_secondary_fixed = ensureContrast(fromHsl(sec_h, upTo(sec_s, 0.10), 0.15), secondary_fixed, 4.5);
++      const Color on_secondary_fixed_variant = ensureContrast(fromHsl(sec_h, upTo(sec_s, 0.10), 0.20), secondary_fixed_dim, 4.5);
++      const Color on_tertiary_fixed = ensureContrast(fromHsl(ter_h, upTo(ter_s, 0.10), 0.15), tertiary_fixed, 4.5);
++      const Color on_tertiary_fixed_variant = ensureContrast(fromHsl(ter_h, upTo(ter_s, 0.10), 0.20), tertiary_fixed_dim, 4.5);
+ 
+       const Color surface_dim = adjustSurface(base_surface, 0.14, 0.08);
+       const Color surface_bright = adjustSurface(base_surface, 0.20, 0.24);

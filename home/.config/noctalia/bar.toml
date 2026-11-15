@@ -56,3 +56,7 @@ type = "noctalia/wallhaven:wallhaven"
 [widget.control-center]
 custom_image = "~/.config/noctalia/nix-flake.png"
 custom_image_colorize = true
+
+[widget.clock]
+format = "{:%A %-m/%-d  %H:%M}"
+tooltip_format = "{:%A %-m/%-d/%Y}"
