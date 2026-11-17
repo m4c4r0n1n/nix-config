@@ -14,7 +14,7 @@
   boot.extraModulePackages = [ ];
 
   fileSystems."/" =
-    { device = "/dev/disk/by-uuid/4f953036-487d-416c-b8ea-cd9a43243f76";
+    { device = "/dev/disk/by-label/nixos-ssd";
       fsType = "ext4";
       options = [ "noatime" ];
     };

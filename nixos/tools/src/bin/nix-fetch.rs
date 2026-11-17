@@ -13,7 +13,7 @@ use tools::home;
 const LOGO_COLUMNS: usize = 46;
 const FPS: f64 = 60.0;
 const STEP: f64 = 0.8;
-const RAMP: &[u8] = b" .:-=+*#%@";
+const RAMP: &[u8] = b" .,:;+*#%$";
 
 type Rgb = (u8, u8, u8);
 
@@ -88,11 +88,12 @@ impl Flake {
             for row in 0..self.rows {
                 let mut line = String::new();
                 for x in 0..width {
-                    let value = pixel(at + row * 2 * width + x).max(pixel(at + (row * 2 + 1) * width + x)) as usize;
+                    let (top, bottom) = (pixel(at + row * 2 * width + x), pixel(at + (row * 2 + 1) * width + x));
+                    let value = if bottom > b' ' { top } else { top.max(bottom) } as usize;
                     match self.table.get(value).copied().flatten() {
                         Some((r, g, b)) => {
                             let shade = value & 15;
-                            let ch = RAMP[1 + shade * 8 / 15] as char;
+                            let ch = if bottom > b' ' { bottom } else { RAMP[1 + shade * 8 / 15] } as char;
                             line += &format!("\x1b[38;2;{r};{g};{b}m{ch}");
                         }
                         None => line.push(' '),

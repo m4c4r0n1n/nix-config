@@ -167,10 +167,30 @@
   hardware.nvidia.open = true;
   hardware.nvidia.modesetting.enable = true;
 
+  systemd.services.greetd.serviceConfig.Type = lib.mkForce "simple";
+
+  fileSystems = lib.genAttrs [ "/home/chrome/.cache" "/home/chrome/.config" "/home/chrome/.local/state" "/home/chrome/.local/share/fonts" "/home/chrome/.local/share/icons" "/home/chrome/.local/share/applications" "/home/chrome/.local/share/qalculate" ] (p: {
+    device = "/ssd" + lib.removePrefix "/home" p;
+    fsType = "none";
+    options = [ "bind" ];
+  }) // {
+    "/home/chrome/Storage" = {
+      device = "/dev/disk/by-label/storage";
+      fsType = "ext4";
+      options = [ "noatime" "nofail" ];
+    };
+  };
+
   services.displayManager.noctalia-greeter = {
     enable = true;
     passwordless-sync-users = [ "chrome" ];
     settings.appearance.hide_logo = true;
+    settings.output = {
+      name = "DP-1";
+      width = 3440;
+      height = 1440;
+      refresh_rate = 240;
+    };
     settings.cursor = {
       theme = "Bibata-Modern-Ice";
       size = 24;
@@ -235,11 +255,17 @@
     pipx
     python3Packages.wfuzz
     adw-gtk3
+    ghidra
+    uv
   ];
   virtualisation.podman.enable = true;
 
   programs.starship.enable = true;
   programs.nix-ld.enable = true;
+  programs.appimage = {
+    enable = true;
+    binfmt = true;
+  };
   services.upower.enable = true;
   services.power-profiles-daemon.enable = true;
   systemd.services.power-profiles-daemon.wantedBy = [ "multi-user.target" ];

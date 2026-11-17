@@ -1,6 +1,6 @@
 id = "chrome/eq"
 name = "Equalizer"
-version = "1.0.0"
+version = "2.0.0"
 plugin_api = 43
 author = "chrome"
 license = "MIT"
@@ -12,8 +12,8 @@ description = "10-band EQ for the Arctis and Arena 9."
 [[panel]]
 id = "panel"
 entry = "panel.luau"
-width = 560
-height = "content"
-max_height = 760
+width = 1060
+height = 548
+keyboard_focus = "exclusive"
 placement = "floating"
 position = "center"

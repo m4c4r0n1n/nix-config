@@ -137,6 +137,7 @@ ShellRoot {
     readonly property var frontActions: [
         { id: "shot",   icon: "camera", label: I18n.tr("Shot") },
         { id: "edit",   icon: "pen",    label: I18n.tr("Edit") },
+        { id: "photocraft", icon: "sketch", label: "PhotoCraft" },
         { id: "ocr",    icon: "ocr",    label: I18n.tr("OCR") },
         { id: "search", icon: "magnify", label: I18n.tr("Search") },
         { id: "record", icon: "video",  label: I18n.tr("Record") }
@@ -580,7 +581,7 @@ ShellRoot {
     }
 
     function isFrontAction(a) {
-        return a === "shot" || a === "edit" || a === "ocr" || a === "search" || a === "record";
+        return a === "shot" || a === "edit" || a === "photocraft" || a === "ocr" || a === "search" || a === "record";
     }
     /** The bar and the number keys pick the action; the choice is remembered. */
     function setFrontAction(id) {
@@ -659,6 +660,11 @@ ShellRoot {
                 "sh", path]);
             root.quitSoon();
             break;
+        case "photocraft":
+            root.exported = true;
+            root.openInPhotocraft(path);
+            root.quitSoon();
+            break;
         case "ocr":
             root.exported = true;
             Quickshell.execDetached([Quickshell.env("HOME") + "/.local/bin/shot-ocr", path]);
@@ -689,11 +695,27 @@ ShellRoot {
         // Beautify; Edit skips straight to Beautify.
         switch (frontAction) {
             case "edit":   phase = "editing"; openBeautify(); break;
+            case "photocraft": doPhotocraftRegion(); break;
             case "ocr":    runOcrRegion(); break;
             case "search": doSearchRegion(); break;
             case "record": doRecordRegion(); break;
             default:       phase = "editing";
         }
+    }
+
+    function openInPhotocraft(path) {
+        Quickshell.execDetached([Quickshell.env("HOME") + "/.local/bin/photocraft", path]);
+    }
+
+    function doPhotocraftRegion() {
+        var path = defaultPath;
+        grabTo(path, function (ok) {
+            if (!ok) { root.quitSoon(); return; }
+            root.exported = true;
+            root.shutter();
+            root.openInPhotocraft(path);
+            root.quitSoon();
+        });
     }
 
     function runOcrRegion() {
@@ -1637,7 +1659,7 @@ ShellRoot {
         if (e.key === Qt.Key_A && (e.modifiers & Qt.ControlModifier)) { root.wholeMonitor(); return true; }
         if (e.key === Qt.Key_Question) { root.shortcutsOpen = !root.shortcutsOpen; return true; }
         // Number keys pick the action; the count matches frontActions.
-        if (e.key >= Qt.Key_1 && e.key <= Qt.Key_5) {
+        if (e.key >= Qt.Key_1 && e.key <= Qt.Key_6) {
             var d = root.frontActions[e.key - Qt.Key_1];
             if (d) { root.setFrontAction(d.id); return true; }
             return false;

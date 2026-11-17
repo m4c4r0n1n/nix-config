@@ -186,6 +186,7 @@ numlock_toggle = true
 "Mod+Return" = { action = "spawn ghostty", repeat = false }
 "Mod+S" = { action = "spawn noctalia msg panel-toggle launcher", repeat = false }
 "Mod+Alt+E" = { action = "spawn noctalia msg panel-toggle chrome/eq:panel", repeat = false }
+"Mod+N" = { action = "spawn obsidian", repeat = false }
 "Mod+Q" = { action = "window-close", repeat = false }
 "Mod+Escape" = "session-quit"
 "Mod+Shift+Escape" = { action = "shortcuts-inhibit-toggle", allow_when_inhibited = true, repeat = false }
@@ -470,12 +471,12 @@ blur_optimized = false
 
 # ==============================================================================
 # Overview
-# Built-in overview and animation values are used. The top-left hot corner opens
-# the overview after a short delay.
+# Built-in overview and animation values are used. The top-left hot corner is off:
+# Mod+O opens the overview.
 # Overview: https://docs.noctalia.dev/umbriel/workspaces-overview/
 # Animation: https://docs.noctalia.dev/umbriel/animation/
 [hot_corners.top_left]
-enabled = true
+enabled = false
 delay_ms = 500
 action = "overview-open"
 

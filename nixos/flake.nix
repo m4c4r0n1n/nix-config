@@ -44,6 +44,7 @@
 	   claude-desktop.packages."x86_64-linux".claude-desktop-fhs
 	   (nixpkgs-unstable.legacyPackages."x86_64-linux".netwatch.overrideAttrs (o: { checkFlags = (o.checkFlags or [ ]) ++ [ "--skip=sandbox::linux::tests::parser_layer_leaves_fast_open_and_autobind_open" ]; }))
 	   (nixpkgs-unstable.legacyPackages."x86_64-linux".ghostty.overrideAttrs (o: { patches = (o.patches or [ ]) ++ [ ./ghostty-drag-out.patch ]; }))
+	   nixpkgs-unstable.legacyPackages."x86_64-linux".fetch
 	 ];
 	 nix.settings.extra-substituters = [
 	   "https://umbriel.cachix.org"
