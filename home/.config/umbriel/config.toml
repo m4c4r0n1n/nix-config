@@ -184,6 +184,7 @@ numlock_toggle = true
 
 # Applications and session
 "Mod+Return" = { action = "spawn ghostty", repeat = false }
+"Mod+Alt+Return" = { action = "spawn ghostty --class=com.mitchellh.ghostty.float --window-padding-x=12 --window-padding-y=12 --window-padding-balance=true", repeat = false }
 "Mod+S" = { action = "spawn noctalia msg panel-toggle launcher", repeat = false }
 "Mod+Alt+E" = { action = "spawn noctalia msg panel-toggle chrome/eq:panel", repeat = false }
 "Mod+N" = { action = "spawn obsidian", repeat = false }
@@ -360,6 +361,12 @@ match.title = "^(Picture-in-Picture|Picture in picture)$"
 default_floating = true
 default_maximize = false
 default_position = { x = 20, y = 20, anchor = "bottom_right" }
+
+[[window_rule]]
+match.app_id = "^com\\.mitchellh\\.ghostty\\.float$"
+default_floating = true
+default_floating_size_px = { width = 900, height = 520 }
+default_position = { x = 0, y = 0, anchor = "center" }
 
 # Mousiki player window.
 [[window_rule]]

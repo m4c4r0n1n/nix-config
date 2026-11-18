@@ -48,6 +48,7 @@ Item {
         "keyboard":  "M3 6h18v12H3z M6 9h1 M10 9h1 M14 9h1 M18 9h1 M6 12h1 M10 12h1 M14 12h1 M18 12h1 M7 15h10",
         "webcam":    "M5 7h14v10H5z M15 12a3 3 0 1 1 -6 0a3 3 0 0 1 6 0z M12 17v3 M9 20h6",
         "folder":    "M3 6h7l2 2h9v11H3z",
+        "wand":      "M4 20L15 9 M13 7l4 4 M17 3v3 M15.5 4.5h3 M20 9v2 M19 10h2 M10 3v2 M9 4h2",
         "phone":     "M6 2h12a2 2 0 0 1 2 2v16a2 2 0 0 1 -2 2H6a2 2 0 0 1 -2 -2V4a2 2 0 0 1 2 -2z M11 5h2 M12 18h.01"
     })
 

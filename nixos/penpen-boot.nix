@@ -3,7 +3,7 @@ evangelion:
 { pkgs, ... }:
 let
   theme = pkgs.runCommand "penpen-grub-theme"
-    { nativeBuildInputs = [ pkgs.imagemagick ]; } ''
+    { nativeBuildInputs = [ pkgs.imagemagick pkgs.librsvg ]; } ''
       cp -r ${evangelion}/themes/penpen/1440p $out
       chmod -R u+w $out
       sed -i \
@@ -12,8 +12,9 @@ let
         -e 's/item_icon_space = 0/item_icon_space = 16/' \
         $out/theme.txt
       mkdir $out/icons
-      cp ${pkgs.nixos-icons}/share/icons/hicolor/48x48/apps/nix-snowflake.png \
-        $out/icons/nixos.png
+      rsvg-convert -w 480 -h 480 ${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake-white.svg -o big.png
+      magick big.png -resize 48x48 -channel A -threshold 50% +channel -fill '#7EBAE4' -colorize 100 \
+        PNG32:$out/icons/nixos.png
       magick -size 48x48 xc:none -fill '#0078D4' -draw \
         'rectangle 2,2 22,22 rectangle 26,2 46,22 rectangle 2,26 22,46 rectangle 26,26 46,46' \
         PNG32:$out/icons/windows.png

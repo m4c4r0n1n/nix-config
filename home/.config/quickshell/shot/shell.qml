@@ -1035,18 +1035,76 @@ ShellRoot {
 
     // Save straight to the Screenshots folder (no dialog), matching Super+S. A
     // beautify render arrives as a temp file and is copied in.
+    property bool naming: false
+    property string saveName: ""
+    property string pendingSrc: ""
+
+    function askName(src) {
+        if (root.exported) return;
+        if (root.textEditing) root.commitText();
+        root.pendingSrc = src || "";
+        root.naming = true;
+    }
+
+    function cancelName() {
+        root.naming = false;
+        root.pendingSrc = "";
+    }
+
+    function nameChosen(text) {
+        var n = String(text).trim().replace(/\//g, "-").replace(/^\.+/, "");
+        if (n.length === 0) return;
+        if (n.length > 0 && !/\.png$/i.test(n)) n += ".png";
+        root.saveName = n;
+        root.naming = false;
+        var src = root.pendingSrc;
+        root.pendingSrc = "";
+        if (src.length > 0) root.saveToScreenshots(src);
+        else if (root.beautifyHasDefault) root.styledExport("save");
+        else root.doSave();
+    }
+
+    function targetPath() {
+        return root.saveName.length > 0 ? root.saveRoot + "/" + root.saveName : root.defaultPath;
+    }
+
+    Process {
+        id: placeProc
+        property var after: null
+        property string fallback: ""
+        stdout: StdioCollector { id: placeOut }
+        function run(src, dest, op, cb) {
+            after = cb;
+            fallback = src;
+            command = ["sh", "-c",
+                "s=$1; d=$2; mkdir -p \"$(dirname \"$d\")\"; "
+                + "if [ \"$s\" = \"$d\" ]; then echo \"$d\"; exit 0; fi; "
+                + "if [ -e \"$d\" ]; then b=${d%.png}; i=2; while [ -e \"$b-$i.png\" ]; do i=$((i+1)); done; d=\"$b-$i.png\"; fi; "
+                + "$3 -- \"$s\" \"$d\" && echo \"$d\" || echo \"$s\"",
+                "sh", src, dest, op];
+            running = true;
+        }
+        onExited: {
+            var p = placeOut.text.trim();
+            var cb = after;
+            after = null;
+            if (cb) cb(p.length > 0 ? p : fallback);
+        }
+    }
+
+    function finishSave(path, clipSrc) {
+        if (Config.copyOnSave)
+            clipCopyProc.start("image/png", clipSrc || path, "saved", path, "", "");
+        else {
+            root.notifyShot(I18n.tr("Screenshot saved"), path);
+            root.quitSoon();
+        }
+    }
+
     function saveToScreenshots(src) {
         if (root.exported) return;
         root.exported = true;
-        var dest = root.defaultPath;
-        Quickshell.execDetached(["sh", "-c",
-            "mkdir -p \"$(dirname \"$2\")\"; [ \"$1\" = \"$2\" ] || cp -- \"$1\" \"$2\"", "sh", src, dest]);
-        if (Config.copyOnSave)
-            clipCopyProc.start("image/png", src, "saved", dest, "", "");
-        else {
-            root.notifyShot(I18n.tr("Screenshot saved"), dest);
-            root.quitSoon();
-        }
+        placeProc.run(src, root.targetPath(), "cp", function (dest) { root.finishSave(dest, src); });
     }
 
     function doCopy() {
@@ -1064,12 +1122,7 @@ ShellRoot {
             if (root.exported) return;
             root.shutter();
             root.exported = true;
-            if (Config.copyOnSave)
-                clipCopyProc.start("image/png", auto, "saved", auto, "", "");
-            else {
-                root.notifyShot(I18n.tr("Screenshot saved"), auto);
-                root.quitSoon();
-            }
+            placeProc.run(auto, root.targetPath(), "mv", function (dest) { root.finishSave(dest); });
         });
     }
 
@@ -1273,7 +1326,7 @@ ShellRoot {
         });
     }
     function exportCopyOrStyled() { if (root.beautifyHasDefault) styledExport("copy"); else root.doCopy(); }
-    function exportSaveOrStyled() { if (root.beautifyHasDefault) styledExport("save"); else root.doSave(); }
+    function exportSaveOrStyled() { root.askName(""); }
 
     function openBeautify() {
         if (root.textEditing) root.commitText();
@@ -1585,6 +1638,7 @@ ShellRoot {
 
     /** The staged Escape ladder: the innermost open thing closes first. */
     function escapeStep() {
+        if (root.naming) { root.cancelName(); return; }
         if (root.colorPicking) { root.colorPicking = false; return; }
         if (root.eyedropArmed) { root.eyedropArmed = false; return; }
         if (root.textEditing) { root.cancelText(); return; }
@@ -1709,7 +1763,7 @@ ShellRoot {
 
                 Keys.onEscapePressed: root.escapeStep()
                 Keys.onPressed: (e) => {
-                    if (root.textEditing) return;
+                    if (root.textEditing || root.naming) return;
                     var handled = root.phase === "selecting" ? root.selectKey(e) : root.editKey(e);
                     if (handled) e.accepted = true;
                 }
@@ -1887,9 +1941,80 @@ ShellRoot {
                     composeOnly: root.composeActive
                     composeMode: root.composeMode
                     onCopyRequested: (p) => root.copyImageAndQuit(p)
-                    onSaveRequested: (p) => root.saveToScreenshots(p)
+                    onSaveRequested: (p) => { if (root.saveName.length > 0) root.saveToScreenshots(p); else root.askName(p); }
                     onPickImageRequested: { root.dialogMode = true; bgDialog.open(); }
                     onCloseRequested: { root.composeActive = false; if (root.fromFile) Qt.quit(); else root.phase = "editing"; }
+                }
+
+                Rectangle {
+                    id: nameBox
+                    anchors.centerIn: parent
+                    visible: root.naming && root.anchorOverlay() === win
+                    width: 440
+                    height: 120
+                    radius: Theme.radius
+                    color: Theme.panelSolid
+                    border.color: Theme.hair
+                    border.width: 1
+                    onVisibleChanged: {
+                        if (visible) { nameField.text = ""; nameField.forceActiveFocus(); }
+                        else nameBox.parent.forceActiveFocus();
+                    }
+
+                    MouseArea { anchors.fill: parent; acceptedButtons: Qt.AllButtons }
+
+                    Text {
+                        x: 16; y: 14
+                        text: I18n.tr("Save as")
+                        color: Theme.ink
+                        font.family: Theme.ui
+                        font.pixelSize: 15
+                        font.weight: Font.DemiBold
+                    }
+
+                    Rectangle {
+                        x: 16; y: 42
+                        width: parent.width - 32
+                        height: 36
+                        radius: 7
+                        color: Theme.field
+                        border.color: Theme.accent
+                        border.width: 1
+
+                        TextInput {
+                            id: nameField
+                            anchors.fill: parent
+                            anchors.leftMargin: 10
+                            anchors.rightMargin: 10
+                            verticalAlignment: TextInput.AlignVCenter
+                            color: Theme.ink
+                            selectionColor: Theme.accent
+                            selectedTextColor: Theme.accentInk
+                            font.family: Theme.ui
+                            font.pixelSize: 15
+                            clip: true
+                            selectByMouse: true
+                            Keys.onReturnPressed: root.nameChosen(text)
+                            Keys.onEnterPressed: root.nameChosen(text)
+                            Keys.onEscapePressed: root.cancelName()
+
+                            Text {
+                                anchors.verticalCenter: parent.verticalCenter
+                                visible: nameField.text.length === 0
+                                text: I18n.tr("Type a name")
+                                color: Theme.inkFaint
+                                font: nameField.font
+                            }
+                        }
+                    }
+
+                    Text {
+                        x: 16; y: 90
+                        text: I18n.tr("Enter saves. Esc goes back.")
+                        color: Theme.inkFaint
+                        font.family: Theme.ui
+                        font.pixelSize: 12
+                    }
                 }
             }
 

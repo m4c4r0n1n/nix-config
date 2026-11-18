@@ -1,0 +1,17 @@
+--- a/src/compositor/noctalia_compositor.c	2026-11-17 01:48:45.490347690 -0500
++++ b/src/compositor/noctalia_compositor.c	2026-11-17 01:49:43.610184269 -0500
+@@ -1470,7 +1470,13 @@
+   const int mode_height = mode != NULL ? mode->height : 0;
+   const float scale = output_ui_scale(server, output->wlr_output, mode_width, mode_height);
+   wlr_output_state_set_scale(&state, scale);
+-  const bool rendered = output_render_black(output->wlr_output, &state);
++  wlr_output_state_set_render_format(&state, 0x30335258u);
++  bool rendered = output_render_black(output->wlr_output, &state);
++  if (!rendered || !wlr_output_test_state(output->wlr_output, &state)) {
++    wlr_output_state_set_render_format(&state, 0x34325258u);
++    rendered = output_render_black(output->wlr_output, &state);
++    wlr_log(WLR_INFO, "10-bit output rejected; using 8-bit");
++  }
+   const bool ok = rendered && wlr_output_commit_state(output->wlr_output, &state);
+   wlr_output_state_finish(&state);
+   if (!ok) {

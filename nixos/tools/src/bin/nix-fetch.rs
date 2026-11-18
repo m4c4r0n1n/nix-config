@@ -14,6 +14,7 @@ const LOGO_COLUMNS: usize = 46;
 const FPS: f64 = 60.0;
 const STEP: f64 = 0.8;
 const RAMP: &[u8] = b" .,:;+*#%$";
+const BRAILLE: u8 = 0x80;
 
 type Rgb = (u8, u8, u8);
 
@@ -89,6 +90,13 @@ impl Flake {
                 let mut line = String::new();
                 for x in 0..width {
                     let (top, bottom) = (pixel(at + row * 2 * width + x), pixel(at + (row * 2 + 1) * width + x));
+                    if top & BRAILLE != 0 {
+                        match (self.table.get((top & !BRAILLE) as usize).copied().flatten(), char::from_u32(0x2800 + bottom as u32)) {
+                            (Some((r, g, b)), Some(ch)) if bottom != 0 => line += &format!("\x1b[38;2;{r};{g};{b}m{ch}"),
+                            _ => line.push(' '),
+                        }
+                        continue;
+                    }
                     let value = if bottom > b' ' { top } else { top.max(bottom) } as usize;
                     match self.table.get(value).copied().flatten() {
                         Some((r, g, b)) => {
@@ -256,13 +264,17 @@ fn main() {
     let tall = flake.rows.max(info.len()) + 1;
     let mut out = "\n".repeat(tall + 3) + &format!("\x1b[{}A", tall + 3);
     for line in &info {
-        out += &format!("\x1b[{}G{line}\n", LOGO_COLUMNS + 3);
+        out += &format!("\x1b[{}G{line}\n", flake.width.max(LOGO_COLUMNS) + 3);
     }
     out += &format!("\x1b[{}A", info.len());
     for line in flake.lines(0) {
         out += &format!("\x1b[1G{line}\n");
     }
-    out += &format!("\x1b[{}B\x1b[1G", tall.saturating_sub(flake.rows + 1));
+    let down = tall.saturating_sub(flake.rows + 1);
+    if down > 0 {
+        out += &format!("\x1b[{down}B");
+    }
+    out += "\x1b[1G";
     let mut stdout = std::io::stdout();
     let _ = stdout.write_all(out.as_bytes());
     let _ = stdout.flush();

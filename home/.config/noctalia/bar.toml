@@ -43,7 +43,7 @@ type = "noctalia/mpvpaper:mpvpaper"
 
 [widget.hdr]
 type = "custom_button"
-glyph = "sun"
+glyph = "hdr"
 tooltip = "Toggle SDR / HDR"
 
 [widget.hdr.actions]

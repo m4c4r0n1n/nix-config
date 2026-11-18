@@ -225,21 +225,7 @@ Item {
 
             Rectangle { Layout.preferredWidth: 1; Layout.preferredHeight: 20; color: Theme.hair; Layout.leftMargin: 3; Layout.rightMargin: 3 }
 
-            Rectangle {
-                Layout.preferredWidth: 32
-                Layout.preferredHeight: 32
-                radius: 7
-                color: beautMa.containsMouse ? Theme.hover : "transparent"
-                Text {
-                    anchors.centerIn: parent
-                    text: tb.mark
-                    color: Theme.accent
-                    font.family: Theme.jp
-                    font.pixelSize: 17
-                    font.weight: Font.DemiBold
-                }
-                MouseArea { id: beautMa; anchors.fill: parent; hoverEnabled: true; onClicked: tb.beautifyRequested() }
-            }
+            IconButton { icon: "wand"; tooltip: I18n.tr("Beautify") + "  (ctrl+b)"; onClicked: tb.beautifyRequested() }
 
             Rectangle { Layout.preferredWidth: 1; Layout.preferredHeight: 20; color: Theme.hair; Layout.leftMargin: 3; Layout.rightMargin: 3 }
 
