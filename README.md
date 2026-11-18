@@ -3,7 +3,7 @@
 ## My NixOS with Umbriel WM.
 
 <p align="center">
-  <img width="640" alt="nix-fetch" src="images/nix-fetch.gif" />
+<img width="1280" height="720" alt="ff" src="https://github.com/user-attachments/assets/8bea9e0d-b75c-4012-b70d-8a417a6fcec7" />
 </p>
 
 ### Music
