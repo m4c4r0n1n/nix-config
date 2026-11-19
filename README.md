@@ -35,5 +35,6 @@
     <td width="50%"><img src="images/apps-launcher.png" width="100%" alt="App launcher" /></td>
   </tr>
 </table>
+Uncreative, I know. I'll work on it EVENTUUUAAAALLLLYYYYYYYYYYY!
 
 Hardware-specific pieces: (RTX 4090, 3440x1440 at 240 Hz, disk UUIDs) need changing for another machine.
