@@ -1,8 +1,8 @@
---- a/src/settings.cpp	2026-11-05 02:36:15.748037584 -0500
-+++ b/src/settings.cpp	2026-11-05 02:36:15.774823663 -0500
-@@ -1,6 +1,12 @@
- // Settings: reads and writes config.txt, converts colour names to terminal codes, and holds the
- // defaults and the key bindings of the program.
+--- a/src/settings.cpp
++++ b/src/settings.cpp
+@@ -3,6 +3,12 @@
+ #include "app_dirs.h"
+ #include "milkdrop.h"
  #include "settings.h"
 +#include <sys/stat.h>
 +#include <cstdio>
@@ -10,10 +10,10 @@
 +#include <ctime>
 +#include <fstream>
 +#include <mutex>
+ #include "process_util.h"   // physical_memory_mb(): the cap of TrackBufferMB
  #include "utf8_util.h"
  #include "string_util.h"
- #include "keyboard_layout.h"
-@@ -81,7 +87,43 @@
+@@ -84,7 +90,43 @@
  namespace {
  struct RGB { int r, g, b; };
  

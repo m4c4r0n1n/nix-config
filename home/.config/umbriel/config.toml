@@ -191,7 +191,7 @@ numlock_toggle = true
 "Mod+Q" = { action = "window-close", repeat = false }
 "Mod+Escape" = "session-quit"
 "Mod+Shift+Escape" = { action = "shortcuts-inhibit-toggle", allow_when_inhibited = true, repeat = false }
-"Mod+B" = { action = "spawn zen-twilight", repeat = false }
+"Mod+B" = { action = "spawn command -v zen-launch >/dev/null && exec zen-launch || exec zen-twilight", repeat = false }
 "Mod+E" = { action = "spawn thunar", repeat = false }
 "Mod+D" = { action = "spawn bash /home/chrome/Projects/project-chat/scripts/vfd-next.sh", repeat = false }
 "Ctrl+Shift+D" = { action = "spawn bash /home/chrome/Projects/project-chat/scripts/vfd-next.sh saver", repeat = false }
@@ -276,15 +276,24 @@ numlock_toggle = true
 "Mod+7" = "workspace-switch 7"
 "Mod+8" = "workspace-switch 8"
 "Mod+9" = "workspace-switch 9"
-"Mod+Shift+1" = "window-move-to-workspace 1"
-"Mod+Shift+2" = "window-move-to-workspace 2"
-"Mod+Shift+3" = "window-move-to-workspace 3"
-"Mod+Shift+4" = "window-move-to-workspace 4"
-"Mod+Shift+5" = "window-move-to-workspace 5"
-"Mod+Shift+6" = "window-move-to-workspace 6"
-"Mod+Shift+7" = "window-move-to-workspace 7"
-"Mod+Shift+8" = "window-move-to-workspace 8"
-"Mod+Shift+9" = "window-move-to-workspace 9"
+"Mod+Shift+1" = "window-move-to-workspace-silent 1"
+"Mod+Alt+1" = "window-move-to-workspace 1"
+"Mod+Shift+2" = "window-move-to-workspace-silent 2"
+"Mod+Alt+2" = "window-move-to-workspace 2"
+"Mod+Shift+3" = "window-move-to-workspace-silent 3"
+"Mod+Alt+3" = "window-move-to-workspace 3"
+"Mod+Shift+4" = "window-move-to-workspace-silent 4"
+"Mod+Alt+4" = "window-move-to-workspace 4"
+"Mod+Shift+5" = "window-move-to-workspace-silent 5"
+"Mod+Alt+5" = "window-move-to-workspace 5"
+"Mod+Shift+6" = "window-move-to-workspace-silent 6"
+"Mod+Alt+6" = "window-move-to-workspace 6"
+"Mod+Shift+7" = "window-move-to-workspace-silent 7"
+"Mod+Alt+7" = "window-move-to-workspace 7"
+"Mod+Shift+8" = "window-move-to-workspace-silent 8"
+"Mod+Alt+8" = "window-move-to-workspace 8"
+"Mod+Shift+9" = "window-move-to-workspace-silent 9"
+"Mod+Alt+9" = "window-move-to-workspace 9"
 
 # Scratchpad
 "Mod+Shift+Space" = { action = "window-move-to-scratchpad", repeat = false }

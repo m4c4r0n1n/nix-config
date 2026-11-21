@@ -213,6 +213,7 @@
     (callPackage ./file-tui.nix { })
     (callPackage ./tools.nix { })
     qimgv
+    gitleaks
     linux-wallpaperengine
     vesktop
     koreader

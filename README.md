@@ -19,9 +19,9 @@
 
 <table>
   <tr>
-  <img width="3440" height="1440" alt="2026_11_16_13_02_07_screenshot" src="https://github.com/user-attachments/assets/d211e969-745b-425c-89ff-660827551366" />
-  <img width="3440" height="1440" alt="2026_11_16_13_00_11_screenshot" src="https://github.com/user-attachments/assets/b746d0ee-20e8-407e-b1d7-faa84118cead" />
-  <img width="922" height="800" alt="2026_11_16_13_08_49_screenshot" src="https://github.com/user-attachments/assets/aca3b1fe-343d-4c2c-ab04-d01a7930a565" />
+    <td width="33%"><img src="images/wallpapers-wall.png" width="100%" alt="2026_11_16_13_00_11_screenshot" /></td>
+    <td width="33%"><img src="images/wallpapers-workshop.png" width="100%" alt="2026_11_16_13_02_07_screenshot" /></td>
+    <td width="33%"><img src="images/wallpapers-browser.png" width="100%" alt="2026_11_16_13_08_49_screenshot" /></td>
   </tr>
 </table>
 

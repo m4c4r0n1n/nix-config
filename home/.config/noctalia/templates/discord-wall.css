@@ -246,7 +246,7 @@ html[data-nana-flip='off'] .wrapper_JJ-hgR[data-list-item-id='guildsnav___home']
   border-bottom-right-radius: 0 !important;
 }
 
-#app-mount li[id^="chat-messages"] > [class*="message_"]:not([class*="groupStart_"]) {
+#app-mount li[id^="chat-messages"] + li[id^="chat-messages"] > [class*="message_"]:not([class*="groupStart_"]) {
   border-top-left-radius: 0 !important;
   border-top-right-radius: 0 !important;
 }
@@ -414,4 +414,44 @@ html[data-nana-flip='off'] .wrapper_JJ-hgR[data-list-item-id='guildsnav___home']
   height: 58px !important;
   left: 0 !important;
   width: 276px !important;
+}
+
+#app-mount [class*="divider_"][class*="isUnread_"],
+#app-mount [class*="divider_"][class*="isUnread_"] [class*="endCap_"],
+#app-mount [class*="divider_"][class*="isUnread_"] [class*="content_"],
+#app-mount li[id^="chat-messages"]:has(+ [class*="divider_"][class*="isUnread_"]:not([class*="hasContent_"]) + li[id^="chat-messages"] > [class*="message_"]:not([class*="groupStart_"])) > [class*="message_"],
+#app-mount [class*="divider_"][class*="isUnread_"]:not([class*="hasContent_"]) + li[id^="chat-messages"] > [class*="message_"]:not([class*="groupStart_"]) {
+  transition: border-color 0s 86400s, opacity 0s 86400s, color 0s 86400s, border-radius 0s 86400s !important;
+}
+
+#app-mount:has([class*="channelTextArea_"]:active) [class*="divider_"][class*="isUnread_"]:not([class*="hasContent_"]) {
+  border-color: transparent !important;
+  transition: border-color 0s !important;
+}
+
+#app-mount:has([class*="channelTextArea_"]:active) [class*="divider_"][class*="isUnread_"][class*="hasContent_"] {
+  border-color: var(--border-subtle) !important;
+  transition: border-color 0s !important;
+}
+
+#app-mount:has([class*="channelTextArea_"]:active) [class*="divider_"][class*="isUnread_"] [class*="endCap_"] {
+  opacity: 0 !important;
+  transition: opacity 0s !important;
+}
+
+#app-mount:has([class*="channelTextArea_"]:active) [class*="divider_"][class*="isUnread_"] [class*="content_"] {
+  color: var(--text-muted) !important;
+  transition: color 0s !important;
+}
+
+#app-mount:has([class*="channelTextArea_"]:active) li[id^="chat-messages"]:has(+ [class*="divider_"][class*="isUnread_"]:not([class*="hasContent_"]) + li[id^="chat-messages"] > [class*="message_"]:not([class*="groupStart_"])) > [class*="message_"] {
+  border-bottom-left-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+  transition: border-radius 0s !important;
+}
+
+#app-mount:has([class*="channelTextArea_"]:active) [class*="divider_"][class*="isUnread_"]:not([class*="hasContent_"]) + li[id^="chat-messages"] > [class*="message_"]:not([class*="groupStart_"]) {
+  border-top-left-radius: 0 !important;
+  border-top-right-radius: 0 !important;
+  transition: border-radius 0s !important;
 }

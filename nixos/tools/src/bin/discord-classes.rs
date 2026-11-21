@@ -23,6 +23,11 @@ static JS_CLASS: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r#"["']?[A-Za-z]\w*["']?:["']([A-Za-z][A-Za-z0-9-]*_{1,2}[A-Za-z0-9_-]{5,6})(?: [^"']*)?["']"#).unwrap()
 });
 static HASH: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^_[0-9a-f]{5}$").unwrap());
+static HEX16: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"[0-9a-f]{16}").unwrap());
+static WEB_MAIN: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"/assets/web\.[0-9a-f]{16}\.(js|css)$").unwrap());
+static CHUNK: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"/assets/(\d+)\.([0-9a-f]{16})\.(?:js|css)$").unwrap());
+const MIN_CHUNKS: usize = 200;
+const MAX_MISSING: usize = 5;
 
 type Modules = BTreeMap<String, BTreeSet<String>>;
 
@@ -58,6 +63,47 @@ fn mtime(meta: &fs::Metadata) -> f64 {
     meta.modified().ok().and_then(|t| t.duration_since(UNIX_EPOCH).ok()).map_or(0.0, |d| d.as_secs_f64())
 }
 
+type Entry = (f64, u64, std::path::PathBuf, Vec<u8>, bool);
+
+fn body(path: &Path, url: &[u8]) -> Option<String> {
+    let data = fs::read(path).ok()?;
+    let at = data.windows(url.len()).position(|w| w == url)?;
+    Some(String::from_utf8_lossy(&unpack(&data[at + url.len()..])).replace('\u{FFFD}', ""))
+}
+
+fn current_chunks(entries: &[Entry]) -> Option<BTreeSet<String>> {
+    let main = |js: bool| {
+        entries
+            .iter()
+            .filter(|e| e.4 != js && WEB_MAIN.is_match(&String::from_utf8_lossy(&e.3)))
+            .max_by(|a, b| a.0.total_cmp(&b.0))
+    };
+    let script = main(true)?;
+    let text = body(&script.2, &script.3)?;
+    let mut set: BTreeSet<String> = HEX16.find_iter(&text).map(|m| m.as_str().to_string()).collect();
+    if set.len() < MIN_CHUNKS {
+        return None;
+    }
+    for e in [Some(script), main(false)].into_iter().flatten() {
+        let name = String::from_utf8_lossy(&e.3);
+        set.extend(HEX16.find_iter(&name).map(|m| m.as_str().to_string()));
+    }
+    let mut newest: HashMap<(String, bool), (f64, String)> = HashMap::new();
+    for e in entries {
+        let name = String::from_utf8_lossy(&e.3);
+        let Some(c) = CHUNK.captures(&name) else { continue };
+        if !text.contains(&format!("\"{}\"", &c[1])) && !text.contains(&format!("{}:", &c[1])) {
+            continue;
+        }
+        let slot = newest.entry((c[1].to_string(), e.4)).or_insert((f64::MIN, String::new()));
+        if e.0 > slot.0 {
+            *slot = (e.0, c[2].to_string());
+        }
+    }
+    set.extend(newest.into_values().map(|v| v.1));
+    Some(set)
+}
+
 fn current_build() -> Modules {
     let cache = setting("DISCORD_CACHE", "/.config/vesktop/sessionData/Cache/Cache_Data");
     let mut entries = Vec::new();
@@ -77,8 +123,16 @@ fn current_build() -> Modules {
     let sheets: Vec<_> = entries.iter().filter(|e| e.4 && e.1 > MAIN_SHEET).collect();
     let pool = if sheets.is_empty() { entries.iter().collect() } else { sheets };
     let Some(newest) = pool.iter().map(|e| e.0).reduce(f64::max) else { return modules };
+    let chunks = current_chunks(&entries);
     for (changed, _, path, url, css) in &entries {
-        if *changed < newest - BUILD_WINDOW {
+        let keep = match &chunks {
+            Some(set) => {
+                let name = String::from_utf8_lossy(url);
+                HEX16.find_iter(&name).any(|m| set.contains(m.as_str()))
+            }
+            None => *changed >= newest - BUILD_WINDOW,
+        };
+        if !keep {
             continue;
         }
         let Ok(data) = fs::read(path) else { continue };
@@ -183,6 +237,13 @@ fn main() {
             }
             None => failed.push(name),
         }
+    }
+    if failed.len() > MAX_MISSING {
+        tell(&format!("{} class names not found. Theme not changed.", failed.len()));
+        for name in failed {
+            println!("not found: {name}");
+        }
+        return;
     }
     if !renames.is_empty() {
         rewrite(&template, &renames);
