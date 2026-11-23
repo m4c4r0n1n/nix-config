@@ -4,13 +4,13 @@
 
 stdenv.mkDerivation rec {
   pname = "mousiki-plus";
-  version = "5.1.0";
+  version = "5.2.0";
 
   src = fetchFromGitHub {
     owner = "StSchwerdtfeger";
     repo = "mousiki-plus";
     rev = "v${version}";
-    hash = "sha256-ZieQ2LGbcj5TTDvLGQgPN9dDcIV6dsCWzxW+b8jaCmE=";
+    hash = "sha256-Ni50zyKe7JjjNDiwwewGkOvkRT/oI75x1cOuavCmDZ8=";
   };
 
   # Gradients use the wallpaper palette, and YouTube streams keep their thumbnail.
