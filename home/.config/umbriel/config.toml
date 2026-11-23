@@ -191,7 +191,7 @@ numlock_toggle = true
 "Mod+Q" = { action = "window-close", repeat = false }
 "Mod+Escape" = "session-quit"
 "Mod+Shift+Escape" = { action = "shortcuts-inhibit-toggle", allow_when_inhibited = true, repeat = false }
-"Mod+B" = { action = "spawn command -v zen-launch >/dev/null && exec zen-launch || exec zen-twilight", repeat = false }
+"Mod+B" = { action = "spawn zen-twilight", repeat = false }
 "Mod+E" = { action = "spawn thunar", repeat = false }
 "Mod+D" = { action = "spawn bash /home/chrome/Projects/project-chat/scripts/vfd-next.sh", repeat = false }
 "Ctrl+Shift+D" = { action = "spawn bash /home/chrome/Projects/project-chat/scripts/vfd-next.sh saver", repeat = false }
