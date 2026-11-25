@@ -2,11 +2,11 @@
 set -euo pipefail
 file="$HOME/.config/vesktop/sessionData/vencordFiles/vencordDesktopRenderer.js"
 [ -f "$file" ] || exit 0
-grep -q 'nana-home-toggle-7' "$file" && exit 0
+grep -q 'nana-home-toggle-8' "$file" && exit 0
 sed -i '/^;(() => {$/,$d' "$file"
 cat >> "$file" <<'JS'
 ;(() => {
-  const marker = "nana-home-toggle-7";
+  const marker = "nana-home-toggle-8";
   if (window[marker]) return;
   window[marker] = true;
   const key = "nana-home-toggle";
@@ -101,7 +101,45 @@ cat >> "$file" <<'JS'
     setInterval(checkLive, 3000);
   };
   startLive();
-  const begin = () => window.Vencord?.Webpack?.onceReady?.then(start);
+  const author = m => {
+    if (m.querySelector('[class*="repliedMessage_"]')) return null;
+    const name = (m.querySelector('[id^="message-username-"]') || m.querySelector('h3 [class*="username_"]'))?.textContent?.trim() || "";
+    const pic = m.querySelector(':scope > [class*="contents_"] > img[class*="avatar_"]')?.getAttribute("src") || "";
+    const id = (pic.match(/\/avatars\/(\d+)\//) || [])[1] || pic;
+    return name || id ? name + "|" + id : null;
+  };
+  const joinGroups = () => {
+    for (const list of document.querySelectorAll('ol[data-list-id="chat-messages"]')) {
+      let last = null;
+      for (const el of list.children) {
+        if (!el.matches('li[id^="chat-messages"]')) {
+          if (!el.matches('[class*="divider_"][class*="isUnread_"]:not([class*="hasContent_"])')) last = null;
+          continue;
+        }
+        const m = el.querySelector(':scope > [class*="message_"]');
+        if (!m || !/groupStart_/.test(m.className)) continue;
+        const who = author(m);
+        if (who && who === last) el.dataset.nanaJoin = "1";
+        else delete el.dataset.nanaJoin;
+        last = who;
+      }
+    }
+  };
+  let joinQueued = false;
+  const startJoin = () => {
+    if (!document.body) return setTimeout(startJoin, 500);
+    new MutationObserver(() => {
+      if (joinQueued) return;
+      joinQueued = true;
+      requestAnimationFrame(() => {
+        joinQueued = false;
+        joinGroups();
+      });
+    }).observe(document.body, { childList: true, subtree: true });
+    joinGroups();
+  };
+  startJoin();
+  const begin =() => window.Vencord?.Webpack?.onceReady?.then(start);
   if (window.Vencord?.Webpack?.onceReady) begin();
   else setTimeout(begin, 1000);
 })();

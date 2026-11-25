@@ -12,7 +12,7 @@ compositor_blur = false
 concave_edge_corners = false
 start = ["workspaces"]
 center = ["cava", "clock"]
-end = ["weather", "hdr", "cpu-temp", "gpu-temp", "media", "tray", "notifications", "network", "bluetooth", "volume", "brightness", "battery", "control-center", "session"]
+end = ["weather", "hdr", "cpu-temp", "gpu-temp", "media", "tray", "notifications", "warp", "network", "bluetooth", "volume", "brightness", "battery", "control-center", "session"]
 
 [bar.default.dead_zone]
 click_through = true
@@ -60,3 +60,11 @@ custom_image_colorize = true
 [widget.clock]
 format = "{:%A %-m/%-d  %H:%M}"
 tooltip_format = "{:%A %-m/%-d/%Y}"
+
+[widget.warp]
+type = "custom_button"
+glyph = "cloud-lock"
+tooltip = "WARP is on. Click to turn off"
+
+[widget.warp.actions]
+left = "exec /home/chrome/.local/bin/warp-toggle"

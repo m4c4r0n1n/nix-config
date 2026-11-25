@@ -199,6 +199,7 @@
   };
 
   security.sudo.extraConfig = "Defaults insults";
+  services.cloudflare-warp.enable = true;
   security.rtkit.enable = true;
 
   services.pipewire = {
