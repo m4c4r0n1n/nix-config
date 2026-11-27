@@ -63,8 +63,8 @@ tooltip_format = "{:%A %-m/%-d/%Y}"
 
 [widget.warp]
 type = "custom_button"
-glyph = "cloud-lock"
-tooltip = "WARP is on. Click to turn off"
+glyph = "cloud-off"
+tooltip = "WARP is off. Click to turn on"
 
 [widget.warp.actions]
 left = "exec /home/chrome/.local/bin/warp-toggle"
